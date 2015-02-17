@@ -105,9 +105,9 @@ namespace Amazon.CognitoSync.SyncManager
             this._key = key;
             this._value = value;
             this._syncCount = syncCount;
-            this._lastModifiedDate = lastModifiedDate;
+            this._lastModifiedDate = lastModifiedDate != null? lastModifiedDate.Value.ToUniversalTime() : lastModifiedDate;
             this._lastModifiedBy = lastModifiedBy;
-            this._deviceLastModifiedDate = deviceLastModifiedDate;
+            this._deviceLastModifiedDate = deviceLastModifiedDate != null? deviceLastModifiedDate.Value.ToUniversalTime() : deviceLastModifiedDate;
             this._modified = modified;
         }
 

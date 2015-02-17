@@ -38,8 +38,8 @@ namespace Amazon.CognitoSync.Model
         /// </summary>
         public DateTime DeviceLastModifiedDate
         {
-            get { return this._deviceLastModifiedDate.GetValueOrDefault(); }
-            set { this._deviceLastModifiedDate = value; }
+            get { return this._deviceLastModifiedDate.GetValueOrDefault().ToUniversalTime(); }
+            set { this._deviceLastModifiedDate = value.ToUniversalTime(); }
         }
 
         // Check to see if DeviceLastModifiedDate property is set
@@ -88,8 +88,8 @@ namespace Amazon.CognitoSync.Model
         /// </summary>
         public DateTime LastModifiedDate
         {
-            get { return this._lastModifiedDate.GetValueOrDefault(); }
-            set { this._lastModifiedDate = value; }
+            get { return this._lastModifiedDate.GetValueOrDefault().ToUniversalTime(); }
+            set { this._lastModifiedDate = value.ToUniversalTime(); }
         }
 
         // Check to see if LastModifiedDate property is set

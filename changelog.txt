@@ -1,0 +1,7 @@
+Version 1.0.1
+Improvements:
+- Enabled CORS, so Amazon Cognito Identity and Sync can now be used inside Unity Web Player.
+- Implemented SynchronizeOnConnectivity(). So that customer can sync user’s data when network connection is active.
+
+Version 1.0.0
+- Initial release

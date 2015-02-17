@@ -23,24 +23,18 @@ using Amazon.CognitoSync.SyncManager.Storage.Model;
 using Amazon.CognitoSync.SyncManager.Util;
 using Amazon.CognitoIdentity;
 using Amazon.CognitoSync;
-using Amazon.Unity;
+using Amazon.Unity3D;
 using Amazon.Common;
 
 namespace Amazon.CognitoSync.SyncManager
 {
     public class DefaultCognitoSyncManager : CognitoSyncManager
     {
-        private static readonly string DATABASE_NAME = "aws_cognito_cache.db";
+        protected static readonly string DATABASE_NAME = "aws_cognito_cache.db";
 
-        private readonly LocalStorage local;
-        private readonly CognitoSyncStorage remote;
-        private readonly CognitoAWSCredentials cognitoCredentials;
-
-        public DefaultCognitoSyncManager()
-            : this((FallbackCredentialsFactory.GetCredentials() as CachingCognitoAWSCredentials),
-                   new AmazonCognitoSyncConfig { RegionEndpoint = AmazonInitializer.CognitoRegionEndpoint })
-        {
-        }
+        protected readonly LocalStorage local;
+        protected readonly CognitoSyncStorage remote;
+        protected readonly CognitoAWSCredentials cognitoCredentials;
 
         public DefaultCognitoSyncManager(CognitoAWSCredentials cognitoCredentials, AmazonCognitoSyncConfig config)
         {
@@ -56,7 +50,7 @@ namespace Amazon.CognitoSync.SyncManager
 #if UNITY_WEBPLAYER
             local = new InMemoryStorage();
 #else
-            local = new SQLiteLocalStorage(System.IO.Path.Combine(AmazonInitializer.persistentDataPath, DATABASE_NAME));
+            local = new SQLiteLocalStorage(System.IO.Path.Combine(AmazonHookedPlatformInfo.Instance.PersistentDataPath, DATABASE_NAME));
 #endif
             remote = new CognitoSyncStorage(cognitoCredentials, config);
             //remote.setUserAgent(USER_AGENT);
@@ -98,7 +92,7 @@ namespace Amazon.CognitoSync.SyncManager
                         local.UpdateDatasetMetadata(GetIdentityId(), response.Datasets);
                         callbackResult.Response = response;
                     }
-					AmazonMainThreadDispatcher.ExecCallback(callback, callbackResult);
+                    AmazonMainThreadDispatcher.ExecCallback(callback, callbackResult);
                 }, state);
                 
             }, null);
@@ -113,13 +107,13 @@ namespace Amazon.CognitoSync.SyncManager
         public void IdentityChanged(object sender, EventArgs e)
         {
             var identityChangedEvent = e as IdentityChangedArgs;
-            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Info, "DefaultCognitoSyncManager", "identity change detected");
-
-            local.ChangeIdentityId(identityChangedEvent.OldIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID
-                                   : identityChangedEvent.OldIdentityId, identityChangedEvent.NewIdentityId);
+            String oldIdentity = identityChangedEvent.OldIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.OldIdentityId;
+            String newIdentity = identityChangedEvent.NewIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.NewIdentityId;
+            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Info, "DefaultCognitoSyncManager", "identity change detected: " + oldIdentity + "," + newIdentity);
+            if (oldIdentity != newIdentity) local.ChangeIdentityId(oldIdentity, newIdentity);
         }
 
-        private string GetIdentityId()
+        protected string GetIdentityId()
         {
             return DatasetUtils.GetIdentityId(cognitoCredentials);
         }

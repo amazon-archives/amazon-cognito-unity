@@ -15,7 +15,7 @@
  * for the specific language governing permissions and 
  * limitations under the License.
  */
-#define DELETE_METHOD_SUPPORT
+
 using System;
 using System.Collections.Generic;
 using System.Collections;
@@ -23,7 +23,7 @@ using System.IO;
 
 using UnityEngine;
 using Amazon.Runtime;
-using Amazon.Unity;
+using Amazon.Unity3D;
 using Amazon.CognitoSync.SyncManager;
 using Amazon.CognitoIdentity;
 using Amazon.CognitoSync.SyncManager.Exceptions;
@@ -214,7 +214,7 @@ namespace Amazon.CognitoSync.SyncManager.Storage
 
 
         }
-#if DELETE_METHOD_SUPPORT
+
         public override void DeleteDatasetAsync(string datasetName, AmazonCognitoCallback callback, object state)
         {
             DeleteDatasetRequest request = new DeleteDatasetRequest();
@@ -225,19 +225,14 @@ namespace Amazon.CognitoSync.SyncManager.Storage
             client.DeleteDatasetAsync(request, delegate(AmazonServiceResult deleteDatasetResult)
             {
                 AmazonCognitoResult result = new AmazonCognitoResult(state);
-                if (deleteDatasetResult.Exception == null)
+                if (deleteDatasetResult.Exception != null)
                 {
                     result.Exception = HandleException(deleteDatasetResult.Exception, "Failed to delete dataset: " + datasetName);
-                }
-                else
-                {
-                    result.Exception = new Exception("Unsupported DeleteDatasetAsync");
-                    //result.Response = deleteDatasetResult.Response;
                 }
                 AmazonMainThreadDispatcher.ExecCallback(callback, result);
             }, null);
         }
-#endif
+
         public override void GetDatasetMetadataAsync(string datasetName, AmazonCognitoCallback callback, object state)
         {
             DescribeDatasetRequest request = new DescribeDatasetRequest();

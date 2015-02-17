@@ -38,7 +38,7 @@ namespace Amazon.CognitoSync.Model
 
 
         /// <summary>
-        /// Gets and sets the property CreationDate. Date.
+        /// Gets and sets the property CreationDate. Date on which the dataset was created.
         /// </summary>
         public DateTime CreationDate
         {

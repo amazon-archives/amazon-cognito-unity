@@ -8,7 +8,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-#define DELETE_METHOD_SUPPORT
+
 
 using System;
 using System.Threading;
@@ -19,7 +19,7 @@ using Amazon.Runtime;
 using Amazon.Runtime.Internal;
 using Amazon.Runtime.Internal.Auth;
 using Amazon.Runtime.Internal.Transform;
-using Amazon.Unity;
+using Amazon.Unity3D;
 
 namespace Amazon.CognitoSync
 {
@@ -36,6 +36,13 @@ namespace Amazon.CognitoSync
     /// obtain a normalized user ID and credentials. User data is persisted in a dataset that
     /// can store up to 1 MB of key-value pairs, and you can have up to 20 datasets per user
     /// identity.
+    /// </para>
+    ///  
+    /// <para>
+    /// With Amazon Cognito Sync, the data stored for each identity is accessible only to
+    /// credentials assigned to that identity. In order to use the Cognito Sync service, you
+    /// need to make API calls using credentials retrieved with <a href="http://docs.aws.amazon.com/cognitoidentity/latest/APIReference/Welcome.html">Amazon
+    /// Cognito Identity service</a>.
     /// </para>
     /// </summary>
     public partial class AmazonCognitoSyncClient : AmazonWebServiceClient, IAmazonCognitoSync
@@ -54,62 +61,6 @@ namespace Amazon.CognitoSync
         #region Constructors
 
         /// <summary>
-        /// Constructs AmazonCognitoSyncClient with the credentials loaded from the application's
-        /// default configuration, and if unsuccessful from the Instance Profile service on an EC2 instance.
-        /// 
-        /// Example App.config with credentials set. 
-        /// <code>
-        /// &lt;?xml version="1.0" encoding="utf-8" ?&gt;
-        /// &lt;configuration&gt;
-        ///     &lt;appSettings&gt;
-        ///         &lt;add key="AWSProfileName" value="AWS Default"/&gt;
-        ///     &lt;/appSettings&gt;
-        /// &lt;/configuration&gt;
-        /// </code>
-        ///
-        /// </summary>
-        public AmazonCognitoSyncClient()
-            : base(FallbackCredentialsFactory.GetCredentials(), new AmazonCognitoSyncConfig(), AuthenticationTypes.User | AuthenticationTypes.Session) { }
-
-        /// <summary>
-        /// Constructs AmazonCognitoSyncClient with the credentials loaded from the application's
-        /// default configuration, and if unsuccessful from the Instance Profile service on an EC2 instance.
-        /// 
-        /// Example App.config with credentials set. 
-        /// <code>
-        /// &lt;?xml version="1.0" encoding="utf-8" ?&gt;
-        /// &lt;configuration&gt;
-        ///     &lt;appSettings&gt;
-        ///         &lt;add key="AWSProfileName" value="AWS Default"/&gt;
-        ///     &lt;/appSettings&gt;
-        /// &lt;/configuration&gt;
-        /// </code>
-        ///
-        /// </summary>
-        /// <param name="region">The region to connect.</param>
-        public AmazonCognitoSyncClient(RegionEndpoint region)
-            : base(FallbackCredentialsFactory.GetCredentials(), new AmazonCognitoSyncConfig { RegionEndpoint = region }, AuthenticationTypes.User | AuthenticationTypes.Session) { }
-
-        /// <summary>
-        /// Constructs AmazonCognitoSyncClient with the credentials loaded from the application's
-        /// default configuration, and if unsuccessful from the Instance Profile service on an EC2 instance.
-        /// 
-        /// Example App.config with credentials set. 
-        /// <code>
-        /// &lt;?xml version="1.0" encoding="utf-8" ?&gt;
-        /// &lt;configuration&gt;
-        ///     &lt;appSettings&gt;
-        ///         &lt;add key="AWSProfileName" value="AWS Default"/&gt;
-        ///     &lt;/appSettings&gt;
-        /// &lt;/configuration&gt;
-        /// </code>
-        ///
-        /// </summary>
-        /// <param name="config">The AmazonCognitoSyncClient Configuration Object</param>
-        public AmazonCognitoSyncClient(AmazonCognitoSyncConfig config)
-            : base(FallbackCredentialsFactory.GetCredentials(), config, AuthenticationTypes.User | AuthenticationTypes.Session) { }
-
-        /// <summary>
         /// Constructs AmazonCognitoSyncClient with AWS Credentials
         /// </summary>
         /// <param name="credentials">AWS Credentials</param>
@@ -124,7 +75,7 @@ namespace Amazon.CognitoSync
         /// <param name="credentials">AWS Credentials</param>
         /// <param name="region">The region to connect.</param>
         public AmazonCognitoSyncClient(AWSCredentials credentials, RegionEndpoint region)
-            : this(credentials, new AmazonCognitoSyncConfig { RegionEndpoint = region })
+            : this(credentials, new AmazonCognitoSyncConfig{RegionEndpoint = region})
         {
         }
 
@@ -156,7 +107,7 @@ namespace Amazon.CognitoSync
         /// <param name="awsSecretAccessKey">AWS Secret Access Key</param>
         /// <param name="region">The region to connect.</param>
         public AmazonCognitoSyncClient(string awsAccessKeyId, string awsSecretAccessKey, RegionEndpoint region)
-            : this(awsAccessKeyId, awsSecretAccessKey, new AmazonCognitoSyncConfig() { RegionEndpoint = region })
+            : this(awsAccessKeyId, awsSecretAccessKey, new AmazonCognitoSyncConfig() {RegionEndpoint=region})
         {
         }
 
@@ -191,7 +142,7 @@ namespace Amazon.CognitoSync
         /// <param name="awsSessionToken">AWS Session Token</param>
         /// <param name="region">The region to connect.</param>
         public AmazonCognitoSyncClient(string awsAccessKeyId, string awsSecretAccessKey, string awsSessionToken, RegionEndpoint region)
-            : this(awsAccessKeyId, awsSecretAccessKey, awsSessionToken, new AmazonCognitoSyncConfig { RegionEndpoint = region })
+            : this(awsAccessKeyId, awsSecretAccessKey, awsSessionToken, new AmazonCognitoSyncConfig{RegionEndpoint = region})
         {
         }
 
@@ -210,34 +161,36 @@ namespace Amazon.CognitoSync
 
         #endregion
 
-#if DELETE_METHOD_SUPPORT
+        
         #region  DeleteDataset
-		
-		/// NOT SUPPORTED - Since it uses DELETE Method
-		/// <summary>
-		/// Initiates the asynchronous execution of the DeleteDataset operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the DeleteDataset operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		public void DeleteDatasetAsync(DeleteDatasetRequest request, AmazonServiceCallback callback, object state)
-		{
-			if (!AmazonInitializer.IsInitialized)
-				throw new Exception("AWSPrefab is not added to the scene");
-			
-			ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-			                                              {
-				var marshaller = new DeleteDatasetRequestMarshaller();
-				var unmarshaller = DeleteDatasetResponseUnmarshaller.Instance;
-				Invoke(request, callback, state, marshaller, unmarshaller, signer);
-			}));
-			return;
-		}
-		
-		
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the DeleteDataset operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the DeleteDataset operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void DeleteDatasetAsync(DeleteDatasetRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new DeleteDatasetRequestMarshaller();
+                var unmarshaller = DeleteDatasetResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
         #endregion
-#endif
+        
         #region  DescribeDataset
 
 
@@ -247,6 +200,8 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the DescribeDataset operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         public void DescribeDatasetAsync(DescribeDatasetRequest request, AmazonServiceCallback callback, object state)
         {
@@ -254,72 +209,104 @@ namespace Amazon.CognitoSync
                 throw new Exception("AWSPrefab is not added to the scene");
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-                                                          {
-                                                              var marshaller = new DescribeDatasetRequestMarshaller();
-                                                              var unmarshaller = DescribeDatasetResponseUnmarshaller.Instance;
-                                                              Invoke(request, callback, state, marshaller, unmarshaller, signer);
-                                                          }));
+            {
+                var marshaller = new DescribeDatasetRequestMarshaller();
+                var unmarshaller = DescribeDatasetResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
             return;
         }
 
 
         #endregion
-
-#if CONTROLPANEL_API_SUPPORT
+        
         #region  DescribeIdentityPoolUsage
-		
-		/// NOT SUPPORTED - Since it is Control Panel API
-		/// <summary>
-		/// Initiates the asynchronous execution of the DescribeIdentityPoolUsage operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the DescribeIdentityPoolUsage operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		public void DescribeIdentityPoolUsageAsync(DescribeIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state)
-		{
-			if (!AmazonInitializer.IsInitialized)
-				throw new Exception("AWSPrefab is not added to the scene");
-			
-			ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-			                                              {
-				var marshaller = new DescribeIdentityPoolUsageRequestMarshaller();
-				var unmarshaller = DescribeIdentityPoolUsageResponseUnmarshaller.Instance;
-				Invoke(request, callback, state, marshaller, unmarshaller, signer);
-			}));
-			return;
-		}
-		
-		
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the DescribeIdentityPoolUsage operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the DescribeIdentityPoolUsage operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void DescribeIdentityPoolUsageAsync(DescribeIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new DescribeIdentityPoolUsageRequestMarshaller();
+                var unmarshaller = DescribeIdentityPoolUsageResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
         #endregion
-		
+        
         #region  DescribeIdentityUsage
-		
-		/// NOT SUPPORTED - Since it is Control Panel API
-		/// <summary>
-		/// Initiates the asynchronous execution of the DescribeIdentityUsage operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the DescribeIdentityUsage operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		public void DescribeIdentityUsageAsync(DescribeIdentityUsageRequest request, AmazonServiceCallback callback, object state)
-		{
-			if (!AmazonInitializer.IsInitialized)
-				throw new Exception("AWSPrefab is not added to the scene");
-			
-			ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-			                                              {
-				var marshaller = new DescribeIdentityUsageRequestMarshaller();
-				var unmarshaller = DescribeIdentityUsageResponseUnmarshaller.Instance;
-				Invoke(request, callback, state, marshaller, unmarshaller, signer);
-			}));
-			return;
-		}
-		
-		
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the DescribeIdentityUsage operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the DescribeIdentityUsage operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void DescribeIdentityUsageAsync(DescribeIdentityUsageRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new DescribeIdentityUsageRequestMarshaller();
+                var unmarshaller = DescribeIdentityUsageResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
         #endregion
-#endif
+        
+        #region  GetIdentityPoolConfiguration
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the GetIdentityPoolConfiguration operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the GetIdentityPoolConfiguration operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void GetIdentityPoolConfigurationAsync(GetIdentityPoolConfigurationRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new GetIdentityPoolConfigurationRequestMarshaller();
+                var unmarshaller = GetIdentityPoolConfigurationResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
+        #endregion
+        
         #region  ListDatasets
 
 
@@ -329,6 +316,8 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the ListDatasets operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         public void ListDatasetsAsync(ListDatasetsRequest request, AmazonServiceCallback callback, object state)
         {
@@ -336,45 +325,46 @@ namespace Amazon.CognitoSync
                 throw new Exception("AWSPrefab is not added to the scene");
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-                                                          {
-                                                              var marshaller = new ListDatasetsRequestMarshaller();
-                                                              var unmarshaller = ListDatasetsResponseUnmarshaller.Instance;
-                                                              Invoke(request, callback, state, marshaller, unmarshaller, signer);
-                                                          }));
+            {
+                var marshaller = new ListDatasetsRequestMarshaller();
+                var unmarshaller = ListDatasetsResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
             return;
         }
 
 
         #endregion
-
-#if CONTROLPANEL_API_SUPPORT
+        
         #region  ListIdentityPoolUsage
-		
-		/// NOT SUPPORTED - Since it is Control Panel API
-		/// <summary>
-		/// Initiates the asynchronous execution of the ListIdentityPoolUsage operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the ListIdentityPoolUsage operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		public void ListIdentityPoolUsageAsync(ListIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state)
-		{
-			if (!AmazonInitializer.IsInitialized)
-				throw new Exception("AWSPrefab is not added to the scene");
-			
-			ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-			                                              {
-				var marshaller = new ListIdentityPoolUsageRequestMarshaller();
-				var unmarshaller = ListIdentityPoolUsageResponseUnmarshaller.Instance;
-				Invoke(request, callback, state, marshaller, unmarshaller, signer);
-			}));
-			return;
-		}
-		
-		
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the ListIdentityPoolUsage operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the ListIdentityPoolUsage operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void ListIdentityPoolUsageAsync(ListIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new ListIdentityPoolUsageRequestMarshaller();
+                var unmarshaller = ListIdentityPoolUsageResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
         #endregion
-#endif
+        
         #region  ListRecords
 
 
@@ -384,6 +374,8 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the ListRecords operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         public void ListRecordsAsync(ListRecordsRequest request, AmazonServiceCallback callback, object state)
         {
@@ -391,17 +383,133 @@ namespace Amazon.CognitoSync
                 throw new Exception("AWSPrefab is not added to the scene");
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-                                                          {
-                                                              var marshaller = new ListRecordsRequestMarshaller();
-                                                              var unmarshaller = ListRecordsResponseUnmarshaller.Instance;
-                                                              Invoke(request, callback, state, marshaller, unmarshaller, signer);
-                                                          }));
+            {
+                var marshaller = new ListRecordsRequestMarshaller();
+                var unmarshaller = ListRecordsResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
             return;
         }
 
 
         #endregion
+        
+        #region  RegisterDevice
 
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the RegisterDevice operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the RegisterDevice operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void RegisterDeviceAsync(RegisterDeviceRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new RegisterDeviceRequestMarshaller();
+                var unmarshaller = RegisterDeviceResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
+        #endregion
+        
+        #region  SetIdentityPoolConfiguration
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the SetIdentityPoolConfiguration operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the SetIdentityPoolConfiguration operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void SetIdentityPoolConfigurationAsync(SetIdentityPoolConfigurationRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new SetIdentityPoolConfigurationRequestMarshaller();
+                var unmarshaller = SetIdentityPoolConfigurationResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
+        #endregion
+        
+        #region  SubscribeToDataset
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the SubscribeToDataset operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the SubscribeToDataset operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void SubscribeToDatasetAsync(SubscribeToDatasetRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new SubscribeToDatasetRequestMarshaller();
+                var unmarshaller = SubscribeToDatasetResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
+        #endregion
+        
+        #region  UnsubscribeFromDataset
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the UnsubscribeFromDataset operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the UnsubscribeFromDataset operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        public void UnsubscribeFromDatasetAsync(UnsubscribeFromDatasetRequest request, AmazonServiceCallback callback, object state)
+        {
+            if (!AmazonInitializer.IsInitialized)
+                throw new Exception("AWSPrefab is not added to the scene");
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            {
+                var marshaller = new UnsubscribeFromDatasetRequestMarshaller();
+                var unmarshaller = UnsubscribeFromDatasetResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
+            return;
+        }
+
+
+        #endregion
+        
         #region  UpdateRecords
 
 
@@ -411,6 +519,8 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the UpdateRecords operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         public void UpdateRecordsAsync(UpdateRecordsRequest request, AmazonServiceCallback callback, object state)
         {
@@ -418,16 +528,16 @@ namespace Amazon.CognitoSync
                 throw new Exception("AWSPrefab is not added to the scene");
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
-                                                          {
-                                                              var marshaller = new UpdateRecordsRequestMarshaller();
-                                                              var unmarshaller = UpdateRecordsResponseUnmarshaller.Instance;
-                                                              Invoke(request, callback, state, marshaller, unmarshaller, signer);
-                                                          }));
+            {
+                var marshaller = new UpdateRecordsRequestMarshaller();
+                var unmarshaller = UpdateRecordsResponseUnmarshaller.Instance;
+                Invoke(request, callback, state, marshaller, unmarshaller, signer);
+            }));
             return;
         }
 
 
         #endregion
-
+        
     }
 }

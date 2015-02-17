@@ -27,7 +27,7 @@ using Amazon.CognitoSync.SyncManager.Util;
 using System.Text;
 using UnityEngine;
 
-using Amazon.Unity.Storage;
+using Amazon.Unity3D.Storage;
 
 namespace Amazon.CognitoSync.SyncManager.Storage
 {

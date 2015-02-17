@@ -14,7 +14,7 @@
  * for the specific language governing permissions and 
  * limitations under the License.
  */
-#define DELETE_METHOD_SUPPORT
+
 using System;
 using System.Collections.Generic;
 
@@ -86,7 +86,7 @@ namespace Amazon.CognitoSync.SyncManager.Storage
         /// <exception cref="DataConflictException"></exception>
         public abstract void PutRecordsAsync(string datasetName, List<Record> records, string syncSessionToken, AmazonCognitoCallback callback, object state);
 
-#if DELETE_METHOD_SUPPORT
+
         /// <summary>
         /// Deletes a dataset.
         /// </summary>
@@ -98,7 +98,8 @@ namespace Amazon.CognitoSync.SyncManager.Storage
         /// 	procedure using the AsyncState property.</param>
         /// <exception cref="DatasetNotFoundException"></exception>
         public abstract void DeleteDatasetAsync(string datasetName, AmazonCognitoCallback callback, object state);
-#endif
+
+		
         public abstract class DatasetUpdates
         {
             public abstract bool Exists

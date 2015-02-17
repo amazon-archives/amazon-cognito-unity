@@ -16,7 +16,7 @@ using Amazon.CognitoSync;
 using Amazon.CognitoSync.Model;
 using Amazon.CognitoSync.SyncManager;
 
-namespace Amazon.Unity
+namespace Amazon.Unity3D
 {
 	public partial class AmazonMainThreadDispatcher
 	{	

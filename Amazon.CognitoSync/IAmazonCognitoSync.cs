@@ -12,8 +12,8 @@
 
 using System;
 
-using Amazon.Runtime;
 using Amazon.CognitoSync.Model;
+using Amazon.Runtime;
 
 namespace Amazon.CognitoSync
 {
@@ -31,26 +31,34 @@ namespace Amazon.CognitoSync
     /// can store up to 1 MB of key-value pairs, and you can have up to 20 datasets per user
     /// identity.
     /// </para>
+    ///  
+    /// <para>
+    /// With Amazon Cognito Sync, the data stored for each identity is accessible only to
+    /// credentials assigned to that identity. In order to use the Cognito Sync service, you
+    /// need to make API calls using credentials retrieved with <a href="http://docs.aws.amazon.com/cognitoidentity/latest/APIReference/Welcome.html">Amazon
+    /// Cognito Identity service</a>.
+    /// </para>
     /// </summary>
     public partial interface IAmazonCognitoSync : IDisposable
     {
 
-#if DELETEMETHOD_SUPPORT
+        
         #region  DeleteDataset
-		
-		/// NOT SUPPORTED - Since it is uses DELETE Method
-		/// <summary>
-		/// Initiates the asynchronous execution of the DeleteDataset operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the DeleteDataset operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		void DeleteDatasetAsync(DeleteDatasetRequest request, AmazonServiceCallback callback, object state);
-		
-        #endregion
-#endif
 
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the DeleteDataset operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the DeleteDataset operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void DeleteDatasetAsync(DeleteDatasetRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
         #region  DescribeDataset
 
 
@@ -60,41 +68,61 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the DescribeDataset operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         void DescribeDatasetAsync(DescribeDatasetRequest request, AmazonServiceCallback callback, object state);
 
         #endregion
-
-#if CONTROLPANEL_API_SUPPORT
+        
         #region  DescribeIdentityPoolUsage
-		
-		/// NOT SUPPORTED - Since it is Control Panel API
-		/// <summary>
-		/// Initiates the asynchronous execution of the DescribeIdentityPoolUsage operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the DescribeIdentityPoolUsage operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		void DescribeIdentityPoolUsageAsync(DescribeIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state);
-		
-        #endregion
-		
-        #region  DescribeIdentityUsage
-		
-		/// NOT SUPPORTED - Since it is Control Panel API
-		/// <summary>
-		/// Initiates the asynchronous execution of the DescribeIdentityUsage operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the DescribeIdentityUsage operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		void DescribeIdentityUsageAsync(DescribeIdentityUsageRequest request, AmazonServiceCallback callback, object state);
-		
-        #endregion
-#endif
 
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the DescribeIdentityPoolUsage operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the DescribeIdentityPoolUsage operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void DescribeIdentityPoolUsageAsync(DescribeIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
+        #region  DescribeIdentityUsage
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the DescribeIdentityUsage operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the DescribeIdentityUsage operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void DescribeIdentityUsageAsync(DescribeIdentityUsageRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
+        #region  GetIdentityPoolConfiguration
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the GetIdentityPoolConfiguration operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the GetIdentityPoolConfiguration operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void GetIdentityPoolConfigurationAsync(GetIdentityPoolConfigurationRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
         #region  ListDatasets
 
 
@@ -104,26 +132,29 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the ListDatasets operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         void ListDatasetsAsync(ListDatasetsRequest request, AmazonServiceCallback callback, object state);
 
         #endregion
-
-#if CONTROLPANEL_API_SUPPORT
+        
         #region  ListIdentityPoolUsage
-		
-		/// NOT SUPPORTED - Since it is Control Panel API
-		/// <summary>
-		/// Initiates the asynchronous execution of the ListIdentityPoolUsage operation.
-		/// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
-		/// </summary>
-		/// <param name="request">Container for the necessary parameters to execute the ListIdentityPoolUsage operation.</param>
-		/// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
-		/// <returns>void</returns>
-		void ListIdentityPoolUsageAsync(ListIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state);
-		
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the ListIdentityPoolUsage operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the ListIdentityPoolUsage operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void ListIdentityPoolUsageAsync(ListIdentityPoolUsageRequest request, AmazonServiceCallback callback, object state);
+
         #endregion
-#endif
+        
         #region  ListRecords
 
 
@@ -133,11 +164,77 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the ListRecords operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         void ListRecordsAsync(ListRecordsRequest request, AmazonServiceCallback callback, object state);
 
         #endregion
+        
+        #region  RegisterDevice
 
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the RegisterDevice operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the RegisterDevice operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void RegisterDeviceAsync(RegisterDeviceRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
+        #region  SetIdentityPoolConfiguration
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the SetIdentityPoolConfiguration operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the SetIdentityPoolConfiguration operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void SetIdentityPoolConfigurationAsync(SetIdentityPoolConfigurationRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
+        #region  SubscribeToDataset
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the SubscribeToDataset operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the SubscribeToDataset operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void SubscribeToDatasetAsync(SubscribeToDatasetRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
+        #region  UnsubscribeFromDataset
+
+
+        /// <summary>
+        /// Initiates the asynchronous execution of the UnsubscribeFromDataset operation.
+        /// <seealso cref="Amazon.CognitoSync.IAmazonCognitoSync"/>
+        /// </summary>
+        /// <param name="request">Container for the necessary parameters to execute the UnsubscribeFromDataset operation.</param>
+        /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
+        /// <returns>void</returns>
+        void UnsubscribeFromDatasetAsync(UnsubscribeFromDatasetRequest request, AmazonServiceCallback callback, object state);
+
+        #endregion
+        
         #region  UpdateRecords
 
 
@@ -147,10 +244,12 @@ namespace Amazon.CognitoSync
         /// </summary>
         /// <param name="request">Container for the necessary parameters to execute the UpdateRecords operation.</param>
         /// <param name="callback">An AsyncCallback delegate that is invoked when the operation completes</param>
+        /// <param name="state">A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+        ///          procedure using the AsyncState property.</param>
         /// <returns>void</returns>
         void UpdateRecordsAsync(UpdateRecordsRequest request, AmazonServiceCallback callback, object state);
 
         #endregion
-
+        
     }
 }

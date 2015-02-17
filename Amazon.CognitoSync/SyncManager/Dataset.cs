@@ -42,9 +42,9 @@ namespace Amazon.CognitoSync.SyncManager
     /// </summary>
     public class SyncFailureEvent : EventArgs
     {
-        public DataStorageException Exception { get; private set; }
+        public Exception Exception { get; private set; }
 
-        internal SyncFailureEvent(DataStorageException exception)
+        internal SyncFailureEvent(Exception exception)
         {
             this.Exception = exception;
         }
@@ -83,6 +83,7 @@ namespace Amazon.CognitoSync.SyncManager
             get;
         }
 
+        /// <summary>
         /// Synchronize <see cref="Dataset"/> between local storage and remote storage.
         /// </summary>
         public abstract void Synchronize();
@@ -217,12 +218,10 @@ namespace Amazon.CognitoSync.SyncManager
         {
             if (OnSyncFailure != null)
             {
-                var dse = exception as DataStorageException;
+				if (exception is DataStorageException)
+					exception = new DataStorageException(exception as DataStorageException);
 
-                if (dse == null)
-                    dse = new DataStorageException(exception);
-
-                OnSyncFailure(this, new SyncFailureEvent(dse));
+				OnSyncFailure(this, new SyncFailureEvent(exception));
             }
         }
         #endregion

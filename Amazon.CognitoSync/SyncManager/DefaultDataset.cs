@@ -14,7 +14,7 @@
  * for the specific language governing permissions and 
  * limitations under the License.
  */
-#define DELETE_METHOD_SUPPORT
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -28,6 +28,7 @@ using Amazon.CognitoSync.SyncManager.Util;
 using Amazon.CognitoSync.SyncManager.Exceptions;
 using Amazon.Runtime;
 using Amazon.Common;
+using Amazon.Unity3D;
 
 
 namespace Amazon.CognitoSync.SyncManager
@@ -41,11 +42,12 @@ namespace Amazon.CognitoSync.SyncManager
         /// <summary>
         /// Max number of retries during synchronize before it gives up.
         /// </summary>
-        private static readonly int MAX_RETRY = 3;
-        private readonly string _datasetName;
-        private readonly LocalStorage _local;
-        private readonly RemoteDataStorage _remote;
-        private readonly CognitoAWSCredentials _cognitoCredentials;
+        protected static readonly int MAX_RETRY = 3;
+        protected readonly string _datasetName;
+        protected readonly LocalStorage _local;
+        protected readonly RemoteDataStorage _remote;
+        protected readonly CognitoAWSCredentials _cognitoCredentials;
+        protected Boolean waitingForConnectivity = false;
 
         public override DatasetMetadata Metadata
         {
@@ -61,6 +63,12 @@ namespace Amazon.CognitoSync.SyncManager
             this._cognitoCredentials = cognitoCredentials;
             this._local = local;
             this._remote = remote;
+            AmazonNetworkStatusInfo.OnRefresh += HandleConnectivityRefresh;
+        }
+
+        ~DefaultDataset() 
+        {
+            AmazonNetworkStatusInfo.OnRefresh -= HandleConnectivityRefresh;
         }
 
         public override void Delete()
@@ -132,8 +140,7 @@ namespace Amazon.CognitoSync.SyncManager
 
         public override void Remove(string key)
         {
-            _local.PutValue(GetIdentityId(), _datasetName,
-                            DatasetUtils.ValidateRecordKey(key), null);
+            _local.PutValue(GetIdentityId(), _datasetName, DatasetUtils.ValidateRecordKey(key), null);
         }
 
         public override void Resolve(List<Record> remoteRecords)
@@ -143,14 +150,20 @@ namespace Amazon.CognitoSync.SyncManager
 
         public override void Synchronize()
         {
-            ThreadPool.QueueUserWorkItem(delegate(object notUsed)
+            if (AmazonMainThreadDispatcher.IsMainThread) 
             {
-                if (!IsNetworkAvailable())
+                if (Application.internetReachability == NetworkReachability.NotReachable)
                 {
                     FireSyncFailureEvent(new NetworkException("Network connectivity unavailable."));
-
                     return;
                 }
+            }
+
+            ThreadPool.QueueUserWorkItem(delegate(object notUsed)
+            {
+                waitingForConnectivity = false;
+
+                bool resume = true;
                 List<string> mergedDatasets = GetLocalMergedDatasets();
                 if (mergedDatasets.Count > 0)
                 {
@@ -158,10 +171,16 @@ namespace Amazon.CognitoSync.SyncManager
 
                     if (this.OnDatasetMerged != null)
                     {
-                        this.OnDatasetMerged(this, mergedDatasets);
+                        resume = this.OnDatasetMerged(this, mergedDatasets);
                     }
                 }
 
+                if (!resume) 
+                {
+                    FireSyncFailureEvent(new OperationCanceledException("Sync canceled on merge"));
+                    return;
+                }
+                
                 if (_cognitoCredentials.IdentityProvider.GetCurrentIdentityId() != null)
                     SynchronizeInternalAsync();
                 else
@@ -181,17 +200,52 @@ namespace Amazon.CognitoSync.SyncManager
 
         public override void SynchronizeOnConnectivity()
         {
-            throw new NotImplementedException();
+            if (AmazonMainThreadDispatcher.IsMainThread)
+            {
+                if (Application.internetReachability != NetworkReachability.NotReachable) 
+                { 
+                    Synchronize();
+                }
+                else 
+                {
+                    waitingForConnectivity = true;
+                }
+            } 
+            else 
+            {
+                waitingForConnectivity = true;
+            }
+            
+        }
+
+        private void HandleConnectivityRefresh (object sender, AmazonNetworkStatusInfo.NetworkStatusRefreshed result) 
+        {
+            if (!waitingForConnectivity)
+            {
+                return;
+            }
+            
+            if (result.NetworkReachability != NetworkReachability.NotReachable)
+            { 
+                Synchronize();
+            }
         }
 
         public void SynchronizeInternalAsync()
         {
             try
             {
+                bool resume = true;
                 List<string> mergedDatasets = GetLocalMergedDatasets();
                 if (mergedDatasets.Count != 0)
                 {
-                    this.OnDatasetMerged(this, mergedDatasets);
+                    resume = this.OnDatasetMerged(this, mergedDatasets);
+                }
+
+                if (!resume)
+                {
+                    FireSyncFailureEvent(new OperationCanceledException("Sync canceled on merge"));
+                    return;
                 }
 
                 this.RunSyncOperationAsync(MAX_RETRY, delegate(RunSyncOperationResponse response)
@@ -210,7 +264,7 @@ namespace Amazon.CognitoSync.SyncManager
 
         }
 
-        private List<string> GetLocalMergedDatasets()
+        protected List<string> GetLocalMergedDatasets()
         {
             List<string> mergedDatasets = new List<string>();
             string prefix = _datasetName + ".";
@@ -255,16 +309,13 @@ namespace Amazon.CognitoSync.SyncManager
             // if dataset is deleted locally, push it to remote
             if (lastSyncCount == -1)
             {
-#if DELETE_METHOD_SUPPORT
                 _remote.DeleteDatasetAsync(_datasetName, delegate(AmazonCognitoResult result)
                 {
                     if (result.Exception != null)
                     {
                         var e = result.Exception as DataStorageException;
                         AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Errors, "CognitoSyncManager", "OnSyncFailure" + e.Message);
-                        this.FireSyncFailureEvent(e);
-                        callback(new RunSyncOperationResponse(false, null));
-                        return;
+                        //Do not throw an exception, this can happen if this was a local-only dataset.
                     }
 
                     _local.PurgeDataset(GetIdentityId(), _datasetName);
@@ -273,11 +324,6 @@ namespace Amazon.CognitoSync.SyncManager
                     callback(new RunSyncOperationResponse(true, null));
                     return;
                 }, null);
-#endif
-                // invalid scenario 
-                AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Critical, "CognitoSyncManager", "OnSyncFailure: DeleteDataset is an invalid operation");
-                FireSyncFailureEvent(new DataStorageException("DeleteDataset is an invalid operation"));
-                callback(new RunSyncOperationResponse(false, null));
                 return;
             }
 
@@ -341,7 +387,7 @@ namespace Amazon.CognitoSync.SyncManager
                         return;
                     }
                 }
-
+                lastSyncCount = datasetUpdates.SyncCount;
                
                 List<Record> remoteRecords = datasetUpdates.Records;
                 if (remoteRecords.Count != 0)
@@ -468,63 +514,17 @@ namespace Amazon.CognitoSync.SyncManager
             }, null);
         }
 
-        private String GetIdentityId()
+        protected String GetIdentityId()
         {
             return DatasetUtils.GetIdentityId(_cognitoCredentials);
         }
 
-        private List<Record> GetModifiedRecords()
+        protected List<Record> GetModifiedRecords()
         {
             return _local.GetModifiedRecords(GetIdentityId(), _datasetName);
         }
 
-        // TODO check internet connectivity
-        private bool IsNetworkAvailable()
-        {
-            // Start/Poll the connection test, report the results in a label and 
-            // react to the results accordingly
-            //var connectionTestResult = Network.TestConnection();
-
-            //Debug.Log(connectionTestResult);
-            return true;
-
-            /*bool connectionAvailable = false;
-            ConnectionTesterStatus connectionTestResult = Network.TestConnection ();
-            switch (connectionTestResult) {
-            case ConnectionTesterStatus.Error: 
-                connectionAvailable = false;
-                break;
-				
-            case ConnectionTesterStatus.Undetermined: 
-                connectionAvailable = false;
-                break;
-				
-            case ConnectionTesterStatus.PublicIPIsConnectable:
-                connectionAvailable = true;
-                break;
-            case ConnectionTesterStatus.PublicIPPortBlocked:
-                connectionAvailable = true;
-                break;
-            case ConnectionTesterStatus.PublicIPNoServerStarted:
-                connectionAvailable = true;
-                break;
-            case ConnectionTesterStatus.LimitedNATPunchthroughPortRestricted:
-                connectionAvailable = true;
-                break;
-            case ConnectionTesterStatus.LimitedNATPunchthroughSymmetric:
-                connectionAvailable = true;
-                break;
-            case ConnectionTesterStatus.NATpunchthroughAddressRestrictedCone:
-            case ConnectionTesterStatus.NATpunchthroughFullCone:
-                connectionAvailable = true;
-                break;
-            default: 
-                connectionAvailable = false;
-                break;
-            }
-
-            return connectionAvailable;*/
-        }
     }
+
 }
 
