@@ -24,7 +24,6 @@ using Amazon.CognitoSync.SyncManager.Util;
 using Amazon.CognitoIdentity;
 using Amazon.CognitoSync;
 using Amazon.Unity3D;
-using Amazon.Common;
 
 namespace Amazon.CognitoSync.SyncManager
 {
@@ -101,7 +100,7 @@ namespace Amazon.CognitoSync.SyncManager
         public override void WipeData()
         {
             local.WipeData();
-            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Info, "DefaultCognitoSyncManager", "All data has been wiped");
+            AmazonLogging.LogInfo("DefaultCognitoSyncManager", "All data has been wiped");
         }
 
         public void IdentityChanged(object sender, EventArgs e)
@@ -109,7 +108,7 @@ namespace Amazon.CognitoSync.SyncManager
             var identityChangedEvent = e as IdentityChangedArgs;
             String oldIdentity = identityChangedEvent.OldIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.OldIdentityId;
             String newIdentity = identityChangedEvent.NewIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.NewIdentityId;
-            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Info, "DefaultCognitoSyncManager", "identity change detected: " + oldIdentity + "," + newIdentity);
+            AmazonLogging.LogInfo("DefaultCognitoSyncManager", "identity change detected: " + oldIdentity + "," + newIdentity);
             if (oldIdentity != newIdentity) local.ChangeIdentityId(oldIdentity, newIdentity);
         }
 

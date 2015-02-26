@@ -27,7 +27,6 @@ using Amazon.CognitoSync.SyncManager.Storage.Model;
 using Amazon.CognitoSync.SyncManager.Util;
 using Amazon.CognitoSync.SyncManager.Exceptions;
 using Amazon.Runtime;
-using Amazon.Common;
 using Amazon.Unity3D;
 
 
@@ -167,7 +166,7 @@ namespace Amazon.CognitoSync.SyncManager
                 List<string> mergedDatasets = GetLocalMergedDatasets();
                 if (mergedDatasets.Count > 0)
                 {
-                    AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "DefaultDataset", "detected merge datasets " + _datasetName);
+                    AmazonLogging.LogInfo("DefaultDataset", "detected merge datasets " + _datasetName);
 
                     if (this.OnDatasetMerged != null)
                     {
@@ -258,7 +257,7 @@ namespace Amazon.CognitoSync.SyncManager
             catch (Exception e)
             {
                 FireSyncFailureEvent(new DataStorageException("Unknown exception", e));
-                AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Errors, "CognitoSyncManager", "failed to synchronize " + e.Message);
+                AmazonLogging.LogException("CognitoSyncManager", e);
             }
 
 
@@ -314,12 +313,12 @@ namespace Amazon.CognitoSync.SyncManager
                     if (result.Exception != null)
                     {
                         var e = result.Exception as DataStorageException;
-                        AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Errors, "CognitoSyncManager", "OnSyncFailure" + e.Message);
+                        AmazonLogging.LogError("CognitoSyncManager", "OnSyncFailure" + e.Message);
                         //Do not throw an exception, this can happen if this was a local-only dataset.
                     }
 
                     _local.PurgeDataset(GetIdentityId(), _datasetName);
-                    AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncSuccess: dataset delete is pushed to remote");
+                    AmazonLogging.LogInfo("CognitoSyncManager", "OnSyncSuccess: dataset delete is pushed to remote");
                     this.FireSyncSuccessEvent(new List<Record>());
                     callback(new RunSyncOperationResponse(true, null));
                     return;
@@ -328,7 +327,7 @@ namespace Amazon.CognitoSync.SyncManager
             }
 
             // get latest modified records from remote
-            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "get latest modified records since " + lastSyncCount);
+            AmazonLogging.LogInfo("CognitoSyncManager", "get latest modified records since " + lastSyncCount);
 
             _remote.ListUpdatesAsync(_datasetName, lastSyncCount, delegate(AmazonCognitoResult listUpdatesResult)
             {
@@ -336,7 +335,7 @@ namespace Amazon.CognitoSync.SyncManager
                 if (listUpdatesResult == null || listUpdatesResult.Exception != null)
                 {
                     var e = listUpdatesResult.Exception as DataStorageException;
-                    AmazonLogging.LogException(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", e);
+                    AmazonLogging.LogException("CognitoSyncManager", e);
                     FireSyncFailureEvent(e);
                     callback(new RunSyncOperationResponse(false, listUpdatesResult.Exception));
                     return;
@@ -356,7 +355,7 @@ namespace Amazon.CognitoSync.SyncManager
                     }
                     else
                     {
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncFailure: Manual cancel");
+                        AmazonLogging.LogInfo("CognitoSyncManager", "OnSyncFailure: Manual cancel");
                         FireSyncFailureEvent(new DataStorageException("Manual cancel"));
                         callback(new RunSyncOperationResponse(false, null));
                         return;
@@ -374,14 +373,14 @@ namespace Amazon.CognitoSync.SyncManager
                         // remove both records and metadata
                         _local.DeleteDataset(GetIdentityId(), _datasetName);
                         _local.PurgeDataset(GetIdentityId(), _datasetName);
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncSuccess");
+                        AmazonLogging.LogInfo("CognitoSyncManager", "OnSyncSuccess");
                         FireSyncSuccessEvent(new List<Record>());
                         callback(new RunSyncOperationResponse(true, null));
                         return;
                     }
                     else
                     {
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncFailure");
+                        AmazonLogging.LogInfo("CognitoSyncManager", "OnSyncFailure");
                         FireSyncFailureEvent(new DataStorageException("Manual cancel"));
                         callback(new RunSyncOperationResponse(false, null));
                         return;
@@ -413,7 +412,7 @@ namespace Amazon.CognitoSync.SyncManager
 
                     if (conflicts.Count > 0)
                     {
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", String.Format("{0} records in conflict!", conflicts.Count));
+                        AmazonLogging.LogInfo("CognitoSyncManager", String.Format("{0} records in conflict!", conflicts.Count));
 
                         bool syncConflictResult = false;
                         if (this.OnSyncConflict == null)
@@ -427,7 +426,7 @@ namespace Amazon.CognitoSync.SyncManager
                         }
                         if (!syncConflictResult)
                         {
-                            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "User cancelled conflict resolution");
+                            AmazonLogging.LogInfo("CognitoSyncManager", "User cancelled conflict resolution");
                             callback(new RunSyncOperationResponse(false, null));
                             return;
                         }
@@ -436,13 +435,13 @@ namespace Amazon.CognitoSync.SyncManager
                     // save to local
                     if (remoteRecords.Count > 0)
                     {
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", String.Format("save {0} records to local", remoteRecords.Count));
+                        AmazonLogging.LogInfo("CognitoSyncManager", String.Format("save {0} records to local", remoteRecords.Count));
                         _local.PutRecords(GetIdentityId(), _datasetName, remoteRecords);
                     }
 
 
                     // new last sync count
-                    AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", String.Format("updated sync count {0}", datasetUpdates.SyncCount));
+                    AmazonLogging.LogInfo("CognitoSyncManager", String.Format("updated sync count {0}", datasetUpdates.SyncCount));
                     _local.UpdateLastSyncCount(GetIdentityId(), _datasetName,
                                               datasetUpdates.SyncCount);
                 }
@@ -452,7 +451,7 @@ namespace Amazon.CognitoSync.SyncManager
                 List<Record> localChanges = this.GetModifiedRecords();
                 if (localChanges.Count != 0)
                 {
-                    AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", String.Format("push {0} records to remote", localChanges.Count));
+                    AmazonLogging.LogInfo("CognitoSyncManager", String.Format("push {0} records to remote", localChanges.Count));
 
                     _remote.PutRecordsAsync(_datasetName, localChanges,
                                                    datasetUpdates.SyncSessionToken, delegate(AmazonCognitoResult putRecordsResult)
@@ -461,13 +460,13 @@ namespace Amazon.CognitoSync.SyncManager
                         {
                             if (putRecordsResult.Exception.GetType() == typeof(DataConflictException))
                             {
-                                AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Warnings, "CognitoSyncManager", "Conflicts detected when pushing changes to remote: " + putRecordsResult.Exception.Message);
+                                AmazonLogging.LogError("CognitoSyncManager", "Conflicts detected when pushing changes to remote: " + putRecordsResult.Exception.Message);
                                 this.RunSyncOperationAsync(--retry, callback);
                                 return;
                             }
                             else if (putRecordsResult.Exception.GetType() == typeof(DataStorageException))
                             {
-                                AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncFailure" + putRecordsResult.Exception.Message);
+                                AmazonLogging.LogError("CognitoSyncManager", "OnSyncFailure" + putRecordsResult.Exception.Message);
                                 FireSyncFailureEvent(putRecordsResult.Exception);
                                 callback(new RunSyncOperationResponse(false, null));
                                 return;
@@ -490,13 +489,13 @@ namespace Amazon.CognitoSync.SyncManager
                         }
                         if (newSyncCount == lastSyncCount + 1)
                         {
-                            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Info, "DefaultDataset",
+                            AmazonLogging.LogInfo("DefaultDataset",
                                               String.Format("updated sync count %d", newSyncCount));
                             _local.UpdateLastSyncCount(GetIdentityId(), _datasetName,
                                                       newSyncCount);
                         }
 
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncSuccess");
+                        AmazonLogging.LogInfo("CognitoSyncManager", "OnSyncSuccess");
                         // call back
                         FireSyncSuccessEvent(remoteRecords);
                         callback(new RunSyncOperationResponse(true, null));
@@ -506,7 +505,7 @@ namespace Amazon.CognitoSync.SyncManager
                 }
 
 
-                AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "CognitoSyncManager", "OnSyncSuccess");
+                AmazonLogging.LogInfo("CognitoSyncManager", "OnSyncSuccess");
                 // call back
                 FireSyncSuccessEvent(remoteRecords);
                 callback(new RunSyncOperationResponse(true, null));

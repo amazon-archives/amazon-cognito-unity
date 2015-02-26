@@ -19,7 +19,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-using Amazon.Common;
+using Amazon.Unity3D;
 using Amazon.Runtime;
 using Amazon.CognitoSync.SyncManager;
 using Amazon.CognitoSync.SyncManager.Util;
@@ -284,7 +284,7 @@ namespace Amazon.CognitoSync.SyncManager.Storage
 
                 if (!result)
                 {
-                    AmazonLogging.LogError(AmazonLogging.AmazonLoggingLevel.Errors, "SQLite", "PutValue failed");
+                    AmazonLogging.LogError("SQLite", "PutValue failed");
 
                 }
                 else
@@ -1014,7 +1014,7 @@ namespace Amazon.CognitoSync.SyncManager.Storage
 
                     if (stmt.Read() && stmt.Fields["count"].INTEGER == 0)
                     {
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "SQLiteLocalStorage", "running create dataset");
+                        AmazonLogging.LogInfo( "SQLiteLocalStorage", "running create dataset");
                         db.Exec(
                     "CREATE TABLE " + TABLE_DATASETS + "("
                             + DatasetColumns.IDENTITY_ID + " TEXT NOT NULL,"
@@ -1040,7 +1040,7 @@ namespace Amazon.CognitoSync.SyncManager.Storage
 
                     if (stmt.Read() && stmt.Fields["count"].INTEGER == 0)
                     {
-                        AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "SQLiteLocalStorage", "running create records");
+                        AmazonLogging.LogInfo("SQLiteLocalStorage", "running create records");
                         db.Exec(
                         "CREATE TABLE " + TABLE_RECORDS + "("
                             + RecordColumns.IDENTITY_ID + " TEXT NOT NULL,"
@@ -1063,7 +1063,7 @@ namespace Amazon.CognitoSync.SyncManager.Storage
                     if (stmt != null)
                         stmt.FinalizeStm();
                 }
-                AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Verbose, "SQLiteLocalStorage", "completed setupdatabase");
+                AmazonLogging.LogInfo("SQLiteLocalStorage", "completed setupdatabase");
             }
         }
     }

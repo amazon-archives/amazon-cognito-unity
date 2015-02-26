@@ -19,7 +19,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Amazon.CognitoSync.SyncManager.Exceptions;
-using Amazon.Common;
+using Amazon.Unity3D;
 
 namespace Amazon.CognitoSync.SyncManager
 {
@@ -258,7 +258,7 @@ namespace Amazon.CognitoSync.SyncManager
         /// </code>
         /// </summary>
         /// 
-        /// <param name="dataset">the dataset that performed sync
+        /// <param name="dataset">the dataset that performed sync</param>
         /// <param name="conflicts">conflicting records</param> 
         /// <return> true if conflicts are resolved so that synchronize will
         ///         retry, false otherwise.</return>
@@ -294,7 +294,7 @@ namespace Amazon.CognitoSync.SyncManager
         #region Default conflict resolution
         protected bool DefaultConflictResolution(List<SyncConflict> conflicts)
         {
-            AmazonLogging.Log(AmazonLogging.AmazonLoggingLevel.Info, this.GetType().ToString(), "Last writer wins conflict resolution for dataset ");
+            AmazonLogging.LogInfo(this.GetType().ToString(), "Last writer wins conflict resolution for dataset ");
 
             List<Record> resolvedRecords = new List<Record>();
 
