@@ -85,7 +85,7 @@ namespace Amazon.CognitoSync.SyncManager
             return new Record(
                 this.Key,
                 this.LocalRecord.Value,
-                this.LocalRecord.SyncCount,
+                this.RemoteRecord.SyncCount,
                 this.LocalRecord.LastModifiedDate,
                 this.LocalRecord.LastModifiedBy,
                 this.LocalRecord.DeviceLastModifiedDate,

@@ -490,7 +490,7 @@ namespace Amazon.CognitoSync.SyncManager
                         if (newSyncCount == lastSyncCount + 1)
                         {
                             AmazonLogging.LogInfo("DefaultDataset",
-                                              String.Format("updated sync count %d", newSyncCount));
+							                      String.Format("updated sync count {0}", newSyncCount));
                             _local.UpdateLastSyncCount(GetIdentityId(), _datasetName,
                                                       newSyncCount);
                         }

@@ -1,3 +1,10 @@
+Version 1.0.3
+Improvements:
+- Added developer-authenticated Amazon Cognito identity providers and a stub class to use as example.
+Fixes:
+- Fixed a crash when debugging on MacOS
+
+
 Version 1.0.1
 Improvements:
 - Enabled CORS, so Amazon Cognito Identity and Sync can now be used inside Unity Web Player.

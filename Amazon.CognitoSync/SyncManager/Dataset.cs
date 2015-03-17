@@ -289,6 +289,30 @@ namespace Amazon.CognitoSync.SyncManager
         /// </summary>
         public DatasetMergedDelegate OnDatasetMerged;
 
+
+		public void ClearAllDelegates()
+		{
+			if (OnSyncSuccess != null)
+				foreach(Delegate d in OnSyncSuccess.GetInvocationList())
+					OnSyncSuccess -= (EventHandler<SyncSuccessEvent>)d;
+
+			if (OnSyncFailure != null)
+				foreach(Delegate d in OnSyncFailure.GetInvocationList())
+					OnSyncFailure -= (EventHandler<SyncFailureEvent>)d;
+
+			if (OnSyncConflict != null)
+				foreach(Delegate d in OnSyncConflict.GetInvocationList())
+					OnSyncConflict -= (SyncConflictDelegate)d;
+
+			if (OnDatasetDeleted != null)
+				foreach(Delegate d in OnDatasetDeleted.GetInvocationList())
+					OnDatasetDeleted -= (DatasetDeletedDelegate)d;
+
+			if (OnDatasetMerged != null)
+				foreach(Delegate d in OnDatasetMerged.GetInvocationList())
+					OnDatasetMerged -= (DatasetMergedDelegate)d;
+		}
+
         #endregion
 
         #region Default conflict resolution
