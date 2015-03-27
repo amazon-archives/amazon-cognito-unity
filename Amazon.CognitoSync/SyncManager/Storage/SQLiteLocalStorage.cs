@@ -630,49 +630,192 @@ namespace Amazon.CognitoSync.SyncManager.Storage
             }
         }
 
+        HashSet<string> GetCommonDatasetNames(string oldIdentityId, string newIdentityId){
+            HashSet<string> newNameSet = new HashSet<string>();
+            HashSet<string> oldNameSet = new HashSet<string>();
+            if(oldIdentityId != null && newIdentityId != null){
+                List<DatasetMetadata> newDatasets = GetDatasets(newIdentityId);
+                List<DatasetMetadata> oldDatasets = GetDatasets(oldIdentityId);
+                foreach(DatasetMetadata oldMetaData in oldDatasets){
+                    oldNameSet.Add(oldMetaData.DatasetName);
+                }
+                foreach(DatasetMetadata newMetaData in newDatasets){
+                    newNameSet.Add(newMetaData.DatasetName);
+                }
+                oldNameSet.IntersectWith(newNameSet);
+            }
+            return oldNameSet;
+        }
+
         public override void ChangeIdentityId(string oldIdentityId, string newIdentityId)
         {
+            Debug.Log ("Reparenting datasets from " + oldIdentityId + " to " + newIdentityId);
+            GetCommonDatasetNames(oldIdentityId, newIdentityId);
             lock (SQLiteDatabase.SQLiteLock)
             {
                 SQLiteStatement stmt = null;
-                try
-                {
+                try {
+                    // if oldIdentityId is unknown, aka the dataset is created prior to
+                    // having a cognito id, just reparent datasets from unknown to
+                    // newIdentityId
+                    if (DatasetUtils.UNKNOWN_IDENTITY_ID == oldIdentityId) {
 
-                    stmt = db.Prepare(
-                    DatasetColumns.BuildUpdate(
-                    new string[] { DatasetColumns.IDENTITY_ID },
-                DatasetColumns.IDENTITY_ID + " = @whereIdentityId"
-                    ));
+                        HashSet<string> commonDatasetNames = GetCommonDatasetNames(oldIdentityId, newIdentityId);
+                        
+                        // append UNKNOWN to the name of all non unique datasets
+                        foreach(String oldDatasetName in commonDatasetNames){
 
-                    stmt.BindText(1, newIdentityId);
-                    stmt.BindText(2, oldIdentityId);
+                                stmt = db.Prepare("UPDATE " + TABLE_DATASETS
+                                      + " SET " + DatasetColumns.DATASET_NAME + " = ?"
+                                      + " WHERE " + DatasetColumns.IDENTITY_ID + " = ?"
+                                      + " AND " + DatasetColumns.DATASET_NAME + " = ?"
+                                );
 
+                                DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                                string timestamp = ((DateTime.UtcNow - epoch).TotalSeconds).ToString();
 
-                    stmt.Step();
+                                stmt.BindText(1, oldDatasetName+"."+oldIdentityId+"-"+timestamp); 
+                                stmt.BindText(2, oldIdentityId);
+                                stmt.BindText(3, oldDatasetName);
 
-                    stmt.FinalizeStm();
+                                stmt.Step();
 
+                                stmt.FinalizeStm();
 
-                    stmt = db.Prepare(
-                RecordColumns.BuildUpdate(
-                    new string[] { RecordColumns.IDENTITY_ID },
-                    RecordColumns.IDENTITY_ID + " = @whereIdentityId"
-                    ));
+                                stmt = db.Prepare("UPDATE " + TABLE_RECORDS
+                                    + " SET " + RecordColumns.DATASET_NAME + " = ?"
+                                    + " WHERE " + RecordColumns.IDENTITY_ID + " = ?"
+                                    + " AND " + RecordColumns.DATASET_NAME + " = ?"
+                                );
+                                
+                                stmt.BindText(1, oldDatasetName+"."+oldIdentityId+"-"+timestamp); 
+                                stmt.BindText(2, oldIdentityId);
+                                stmt.BindText(3, oldDatasetName);
 
+                                stmt.Step();
+                                
+                                stmt.FinalizeStm();
+                        }
 
-                    stmt.BindText(1, newIdentityId);
-                    stmt.BindText(2, oldIdentityId);
+                        stmt = db.Prepare(
+                            DatasetColumns.BuildUpdate(
+                                new string[] { DatasetColumns.IDENTITY_ID },
+                                DatasetColumns.IDENTITY_ID + " = ?"
+                            )
+                        );
+                        
+                        stmt.BindText(1, newIdentityId);
+                        stmt.BindText(2, oldIdentityId);
+                        
+                        stmt.Step();
+                        
+                        stmt.FinalizeStm();
+                        
+                        
+                        stmt = db.Prepare(
+                            RecordColumns.BuildUpdate(
+                                new string[] { RecordColumns.IDENTITY_ID },
+                                RecordColumns.IDENTITY_ID + " = ?"
+                            )
+                        );
+                        
+                        
+                        stmt.BindText(1, newIdentityId);
+                        stmt.BindText(2, oldIdentityId);
+                        
+                        stmt.Step();
 
+                    } else {
+                        // 1. copy oldIdentityId/dataset to newIdentityId/dataset
+                        // datasets table
+                        stmt = db.Prepare("INSERT INTO " + TABLE_DATASETS + "("
+                            + DatasetColumns.IDENTITY_ID + ","
+                            + DatasetColumns.DATASET_NAME + ","
+                            + DatasetColumns.CREATION_TIMESTAMP + ","
+                            + DatasetColumns.STORAGE_SIZE_BYTES + ","
+                            + DatasetColumns.RECORD_COUNT
+                            // last sync count is reset to default 0
+                            + ")"
+                            + " SELECT "
+                            + "'" + newIdentityId + "'," // assign new owner
+                            + DatasetColumns.DATASET_NAME + ","
+                            + DatasetColumns.CREATION_TIMESTAMP + ","
+                            + DatasetColumns.STORAGE_SIZE_BYTES + ","
+                            + DatasetColumns.RECORD_COUNT
+                            + " FROM " + TABLE_DATASETS
+                            + " WHERE " + DatasetColumns.IDENTITY_ID + " = ?"
+                        );
 
-                    stmt.Step();
-                }
-                finally
-                {
+                        stmt.BindText(1, oldIdentityId);
+
+                        stmt.Step();
+                        stmt.FinalizeStm();
+
+                        // records table
+                        stmt = db.Prepare("INSERT INTO " + TABLE_RECORDS + "("
+                            + RecordColumns.IDENTITY_ID + ","
+                            + RecordColumns.DATASET_NAME + ","
+                            + RecordColumns.KEY + ","
+                            + RecordColumns.VALUE + ","
+                            // sync count is resset to default 0
+                            + RecordColumns.LAST_MODIFIED_TIMESTAMP + ","
+                            + RecordColumns.LAST_MODIFIED_BY + ","
+                            + RecordColumns.DEVICE_LAST_MODIFIED_TIMESTAMP
+                            // modified is reset to default 1 (dirty)
+                            + ")"
+                            + " SELECT "
+                            + "'" + newIdentityId + "'," // assign new owner
+                            + RecordColumns.DATASET_NAME + ","
+                            + RecordColumns.KEY + ","
+                            + RecordColumns.VALUE + ","
+                            + RecordColumns.LAST_MODIFIED_TIMESTAMP + ","
+                            + RecordColumns.LAST_MODIFIED_BY + ","
+                            + RecordColumns.DEVICE_LAST_MODIFIED_TIMESTAMP
+                            + " FROM " + TABLE_RECORDS
+                            + " WHERE " + RecordColumns.IDENTITY_ID + " = ?"
+                        );
+
+                        stmt.BindText(1, oldIdentityId);
+
+                        stmt.Step();
+                        stmt.FinalizeStm();
+
+                        // 2. rename oldIdentityId/dataset to
+                        // newIdentityId/dataset.oldIdentityId
+                        // datasets table
+                        stmt = db.Prepare("UPDATE " + TABLE_DATASETS
+                            + " SET "
+                            + DatasetColumns.IDENTITY_ID + " = '" + newIdentityId + "', "
+                            + DatasetColumns.DATASET_NAME + " = "
+                            + DatasetColumns.DATASET_NAME + " || '." + oldIdentityId + "'"
+                            + " WHERE " + DatasetColumns.IDENTITY_ID + " = ?"
+                        );
+
+                        stmt.BindText(1, oldIdentityId);
+
+                        stmt.Step();
+                        stmt.FinalizeStm();
+
+                        // records table
+                        stmt = db.Prepare("UPDATE " + TABLE_RECORDS
+                            + " SET "
+                            + RecordColumns.IDENTITY_ID + " = '" + newIdentityId + "', "
+                            + RecordColumns.DATASET_NAME + " = "
+                            + RecordColumns.DATASET_NAME + " || '." + oldIdentityId + "'"
+                            + " WHERE " + RecordColumns.IDENTITY_ID + " = ?"
+                        );
+
+                        stmt.BindText(1, oldIdentityId);
+
+                        stmt.Step();
+                    }
+                } finally {
                     stmt.FinalizeStm();
                 }
             }
+                    
         }
-
+ 
         public override void UpdateDatasetMetadata(string identityId, List<DatasetMetadata> datasetMetadata)
         {
             lock (SQLiteDatabase.SQLiteLock)

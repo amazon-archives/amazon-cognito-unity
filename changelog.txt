@@ -1,3 +1,9 @@
+Version 1.0.4
+Fixes:
+- Fixed a bug that DefaultDataset's Synchronization doesn't refresh the credentials if they are invalid (ie: after adding a login).
+- Fixed a SQLite UNIQUE constraint exception that is caused by storing same name datasets in SQLite.
+- Removed reference to sqlite3.dll, which caused error messages when looking for sqlite3.dll.
+
 Version 1.0.3
 Improvements:
 - Added developer-authenticated Amazon Cognito identity providers and a stub class to use as example.

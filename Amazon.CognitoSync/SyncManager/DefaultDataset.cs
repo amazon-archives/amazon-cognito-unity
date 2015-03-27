@@ -180,7 +180,7 @@ namespace Amazon.CognitoSync.SyncManager
                     return;
                 }
                 
-                if (_cognitoCredentials.IdentityProvider.GetCurrentIdentityId() != null)
+                if (_cognitoCredentials.IdentityProvider.GetCurrentIdentityId() != null && _cognitoCredentials.GetCredentials() != null)
                     SynchronizeInternalAsync();
                 else
                 {
