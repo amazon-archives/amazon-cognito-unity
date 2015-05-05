@@ -297,12 +297,6 @@ namespace Amazon.CognitoSync.SyncManager
 
         private void RunSyncOperationAsync(int retry, Action<RunSyncOperationResponse> callback)
         {
-            if (retry < 0)
-            {
-                callback(new RunSyncOperationResponse(false, null));
-                return;
-            }
-
             long lastSyncCount = _local.GetLastSyncCount(GetIdentityId(), _datasetName);
 
             // if dataset is deleted locally, push it to remote
@@ -350,7 +344,12 @@ namespace Amazon.CognitoSync.SyncManager
                     bool resume = this.OnDatasetMerged(this, datasetUpdates.MergedDatasetNameList);
                     if (resume)
                     {
-                        this.RunSyncOperationAsync(--retry, callback);
+                        if (retry == 0) {
+                            callback(new RunSyncOperationResponse(false, null));
+                            FireSyncFailureEvent(new DataStorageException("Out of retries"));
+                        } else {
+                            this.RunSyncOperationAsync(--retry, callback);
+                        }
                         return;
                     }
                     else
@@ -406,6 +405,7 @@ namespace Amazon.CognitoSync.SyncManager
                             conflicts.Add(new SyncConflict(remoteRecord, localRecord));
                             conflictRecords.Add(remoteRecord);
                         }
+
                     }
                     // retaining only non-conflict records
                     remoteRecords.RemoveAll(t => conflictRecords.Contains(t));
@@ -449,6 +449,15 @@ namespace Amazon.CognitoSync.SyncManager
 
                 // push changes to remote
                 List<Record> localChanges = this.GetModifiedRecords();
+
+                long maxPatchSyncCount = 0;
+                foreach (Record r in localChanges) {
+                    //track the max sync count
+                    if (r.SyncCount > maxPatchSyncCount) {
+                        maxPatchSyncCount = r.SyncCount;
+                    }
+                }
+
                 if (localChanges.Count != 0)
                 {
                     AmazonLogging.LogInfo("CognitoSyncManager", String.Format("push {0} records to remote", localChanges.Count));
@@ -461,7 +470,16 @@ namespace Amazon.CognitoSync.SyncManager
                             if (putRecordsResult.Exception.GetType() == typeof(DataConflictException))
                             {
                                 AmazonLogging.LogError("CognitoSyncManager", "Conflicts detected when pushing changes to remote: " + putRecordsResult.Exception.Message);
-                                this.RunSyncOperationAsync(--retry, callback);
+                                if (retry == 0) {
+                                    callback(new RunSyncOperationResponse(false, null));
+                                    FireSyncFailureEvent(putRecordsResult.Exception);
+                                } else {
+                                    //it's possible there is a local dirty record with a stale sync count this will fix it
+                                    if (lastSyncCount > maxPatchSyncCount) {
+                                        _local.UpdateLastSyncCount(GetIdentityId(), _datasetName,  maxPatchSyncCount);
+                                    }
+                                    this.RunSyncOperationAsync(--retry, callback);
+                                }
                                 return;
                             }
                             else if (putRecordsResult.Exception.GetType() == typeof(DataStorageException))
