@@ -234,18 +234,6 @@ namespace Amazon.CognitoSync.SyncManager
         {
             try
             {
-                bool resume = true;
-                List<string> mergedDatasets = GetLocalMergedDatasets();
-                if (mergedDatasets.Count != 0)
-                {
-                    resume = this.OnDatasetMerged(this, mergedDatasets);
-                }
-
-                if (!resume)
-                {
-                    FireSyncFailureEvent(new OperationCanceledException("Sync canceled on merge"));
-                    return;
-                }
 
                 this.RunSyncOperationAsync(MAX_RETRY, delegate(RunSyncOperationResponse response)
                 {
