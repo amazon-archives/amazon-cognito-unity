@@ -29,8 +29,6 @@ namespace Amazon.CognitoSync.SyncManager
 {
     public class DefaultCognitoSyncManager : CognitoSyncManager
     {
-        protected static readonly string DATABASE_NAME = "aws_cognito_cache.db";
-
         protected readonly LocalStorage local;
         protected readonly CognitoSyncStorage remote;
         protected readonly CognitoAWSCredentials cognitoCredentials;
@@ -49,7 +47,7 @@ namespace Amazon.CognitoSync.SyncManager
 #if UNITY_WEBPLAYER
             local = new InMemoryStorage();
 #else
-            local = new SQLiteLocalStorage(System.IO.Path.Combine(AmazonHookedPlatformInfo.Instance.PersistentDataPath, DATABASE_NAME));
+			local = new SQLiteLocalStorage(System.IO.Path.Combine(AmazonHookedPlatformInfo.Instance.PersistentDataPath, AWSConfigs.CognitoDBName));
 #endif
             remote = new CognitoSyncStorage(cognitoCredentials, config);
             //remote.setUserAgent(USER_AGENT);

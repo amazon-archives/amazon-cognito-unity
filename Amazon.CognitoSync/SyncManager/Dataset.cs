@@ -233,6 +233,7 @@ namespace Amazon.CognitoSync.SyncManager
 
         public delegate bool DatasetMergedDelegate(Dataset dataset, List<string> datasetNames);
 
+		public delegate List<Record> DatasetUpdatingDelegate(Dataset dataset, List<Record> records);
 
         /// <summary>
         /// This can be triggered during two phases. One is when the remote
@@ -289,6 +290,13 @@ namespace Amazon.CognitoSync.SyncManager
         /// </summary>
         public DatasetMergedDelegate OnDatasetMerged;
 
+		/// <summary>
+		/// When a dataset is receving remote updates, allow the client to preprocess them prior to commit.
+		/// The incoming list contains all of the records being added or updated from remote.
+		/// The return value will contain all of the records which should be committed.
+		/// </summary>
+		public DatasetUpdatingDelegate OnDatasetUpdating;
+
 
 		public void ClearAllDelegates()
 		{
@@ -311,6 +319,10 @@ namespace Amazon.CognitoSync.SyncManager
 			if (OnDatasetMerged != null)
 				foreach(Delegate d in OnDatasetMerged.GetInvocationList())
 					OnDatasetMerged -= (DatasetMergedDelegate)d;
+
+			if (OnDatasetUpdating != null)
+				foreach(Delegate d in OnDatasetUpdating.GetInvocationList())
+					OnDatasetUpdating -= (DatasetUpdatingDelegate)d;
 		}
 
         #endregion

@@ -423,6 +423,9 @@ namespace Amazon.CognitoSync.SyncManager
                     // save to local
                     if (remoteRecords.Count > 0)
                     {
+						if (this.OnDatasetUpdating != null){
+							remoteRecords = this.OnDatasetUpdating(this, remoteRecords);
+						}
                         AmazonLogging.LogInfo("CognitoSyncManager", String.Format("save {0} records to local", remoteRecords.Count));
                         _local.PutRecords(GetIdentityId(), _datasetName, remoteRecords);
                     }
