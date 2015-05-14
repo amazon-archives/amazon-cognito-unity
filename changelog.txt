@@ -1,20 +1,48 @@
-Version 1.0.4
+Version 2.0.0.0
+For a complete list of New Features and Improvements please visit <link>
+
+Version 1.0.5
 Fixes:
-- Fixed a bug that DefaultDataset's Synchronization doesn't refresh the credentials if they are invalid (ie: after adding a login).
-- Fixed a SQLite UNIQUE constraint exception that is caused by storing same name datasets in SQLite.
-- Removed reference to sqlite3.dll, which caused error messages when looking for sqlite3.dll.
+- Fixed a bug which prevented the AWS4Signer from working in the Unity Mono scripting backend.
+
+
+Version 1.0.4
+New Feature:
+- Added feature that allows user to set Client Id in Amazon Mobile Analytics.
+Fixes:
+- Fixed the bug is S3 that disables HTTPS in us-east-1 region and S3 POST operation.
+- Addressed the issue in Mobile Analytics that adding empty attribute value in event would throw exception.
+
+
 
 Version 1.0.3
+New Feature:
+- Added developer-authenticated Cognito identity providers and a stub class to use as example.
 Improvements:
-- Added developer-authenticated Amazon Cognito identity providers and a stub class to use as example.
-Fixes:
-- Fixed a crash when debugging on MacOS
+- Fixed crash in WWWRequestData.cs for iOS 64-bit.
+- Fixed AWS SigV4 signer for iOS 64-bit.
+- Updated S3 signature to support SigV4 
+- Fixed bug which caused the Unity Editor to force close while debugging.
+
+
+Version 1.0.2
+New Feature:
+- Added Amazon Mobile Analytics.
+Improvements:
+- Improved Unity SDK Logging.
 
 
 Version 1.0.1
+Fixes:
+- Fixed Cognito Credential Provider bug that cannot refresh credential when it's expired.
+- Always use UTC instead of local time, which fixes inconsistencies in the dataset metadata timestamps.
+- Address issue that could clear cached Cognito identityId.
 Improvements:
 - Enabled CORS, so Amazon Cognito Identity and Sync can now be used inside Unity Web Player.
-- Implemented SynchronizeOnConnectivity(). So that customer can sync user’s data when network connection is active.
+- Name-spaced cache to support multiple Cognito identity pools.
+- Change Cognito Credential Provider Constructor. User now needs to provide only Cognito Identity Pool Id. 
+- Relaxed access modifiers, allowing developers to extend some of our classes.
+
 
 Version 1.0.0
 - Initial release
