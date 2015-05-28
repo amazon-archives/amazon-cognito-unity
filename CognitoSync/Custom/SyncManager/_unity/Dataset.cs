@@ -14,7 +14,6 @@
 // for the specific language governing permissions and 
 // limitations under the License.
 //
-
 using Amazon.CognitoIdentity;
 using Amazon.CognitoSync.SyncManager.Internal;
 using Amazon.Runtime.Internal;
@@ -341,10 +340,23 @@ namespace Amazon.CognitoSync.SyncManager
             }
         }
 
+        bool locked = false;
+        bool queuedSync = false;
         private void SynchronizeInternalAsync()
         {
             try
             {
+                if (locked)
+                {
+                    _logger.InfoFormat("Already in a Synchronize. Queueing new request.", _datasetName);
+                    queuedSync = true;
+                    return;
+                }
+                else
+                {
+                    locked = true;
+                }
+
                 waitingForConnectivity = false;
 
                 bool resume = true;
@@ -365,21 +377,27 @@ namespace Amazon.CognitoSync.SyncManager
                     return;
                 }
 
-                this.RunSyncOperationAsync(MAX_RETRY, delegate(RunSyncOperationResponse response)
-                {
-                    if (response == null || response.Exception != null)
-                        FireSyncFailureEvent(new SyncManagerException("Unknown exception", response.Exception));
-                });
+
+                RunSyncOperationAsync(MAX_RETRY);
 
             }
             catch (Exception e)
             {
-                FireSyncFailureEvent(new SyncManagerException("Unknown exception", e));
+                FireSyncFailureEvent(e);
                 _logger.Error(e, "");
             }
         }
         #endregion
 
+        private void EndSynchronizeAndCleanup()
+        {
+            locked = false;
+            if (queuedSync)
+            {
+                queuedSync = false;
+                SynchronizeInternalAsync();
+            }
+        }
         #region helper methods
 
         protected List<string> GetLocalMergedDatasets()
@@ -406,7 +424,7 @@ namespace Amazon.CognitoSync.SyncManager
             return _local.GetModifiedRecords(GetIdentityId(), _datasetName);
         }
 
-        private void RunSyncOperationAsync(int retry, Action<RunSyncOperationResponse> callback)
+        private void RunSyncOperationAsync(int retry)
         {
 
             long lastSyncCount = _local.GetLastSyncCount(GetIdentityId(), _datasetName);
@@ -414,19 +432,28 @@ namespace Amazon.CognitoSync.SyncManager
             // if dataset is deleted locally, push it to remote
             if (lastSyncCount == -1)
             {
-                _remote.DeleteDatasetAsync(_datasetName, (cognitoResult) =>
-                {
+                _remote.DeleteDatasetAsync(_datasetName, (cognitoResult) => {
                     if (cognitoResult.Exception != null)
                     {
-                        var e = cognitoResult.Exception as SyncManagerException;
-                        _logger.InfoFormat("OnSyncFailure : {0} , dataset : {1}", e.Message, this._datasetName);
-                        //Do not throw an exception, this can happen if this was a local-only dataset.
+                        if (cognitoResult.Exception is DatasetNotFoundException)
+                        {
+                            _logger.Error(cognitoResult.Exception, "Dataset was local-only, it's safe to ignore the service exception. Continuing.");
+                        }
+                        else
+                        {
+                            Exception e = cognitoResult.Exception;
+                            _logger.InfoFormat("{0} , dataset : {1}", e.Message, this._datasetName);
+                            EndSynchronizeAndCleanup();
+                            FireSyncFailureEvent(e);
+                            return;
+                        }
                     }
 
                     _local.PurgeDataset(GetIdentityId(), _datasetName);
                     _logger.InfoFormat("OnSyncSuccess: dataset delete is pushed to remote - {0}", this._datasetName);
-                    this.FireSyncSuccessEvent(new List<Record>());
-                    callback(new RunSyncOperationResponse(true, null));
+                    EndSynchronizeAndCleanup();
+                    FireSyncSuccessEvent(new List<Record>());
+
                     return;
                 });
                 return;
@@ -436,16 +463,17 @@ namespace Amazon.CognitoSync.SyncManager
             _logger.InfoFormat("get latest modified records since {0} for dataset {1}", lastSyncCount, this._datasetName);
 
             _remote.ListUpdatesAsync(_datasetName, lastSyncCount, (cognitoResult) =>
+
             {
                 DatasetUpdates datasetUpdates = cognitoResult.Response;
                 Exception listUpdatesException = cognitoResult.Exception;
 
                 if (datasetUpdates == null || listUpdatesException != null)
                 {
-                    var e = listUpdatesException as SyncManagerException;
-                    _logger.Error(e, string.Empty);
-                    FireSyncFailureEvent(e);
-                    callback(new RunSyncOperationResponse(false, listUpdatesException));
+                    _logger.Error(listUpdatesException, string.Empty);
+                    EndSynchronizeAndCleanup();
+                    FireSyncFailureEvent(listUpdatesException);
+
                     return;
                 }
 
@@ -455,18 +483,18 @@ namespace Amazon.CognitoSync.SyncManager
                     if (resume)
                     {
                         if (retry == 0) {
-                            callback(new RunSyncOperationResponse(false, null));
+                            EndSynchronizeAndCleanup();
                             FireSyncFailureEvent(new SyncManagerException("Out of retries"));
                         } else {
-                            this.RunSyncOperationAsync(--retry, callback);
+                            this.RunSyncOperationAsync(--retry);
                         }
                         return;
                     }
                     else
                     {
                         _logger.InfoFormat("OnSyncFailure: Manual Cancel");
+                        EndSynchronizeAndCleanup();
                         FireSyncFailureEvent(new SyncManagerException("Manual cancel"));
-                        callback(new RunSyncOperationResponse(false, null));
                         return;
                     }
                 }
@@ -482,15 +510,15 @@ namespace Amazon.CognitoSync.SyncManager
                         _local.DeleteDataset(GetIdentityId(), _datasetName);
                         _local.PurgeDataset(GetIdentityId(), _datasetName);
                         _logger.InfoFormat("OnSyncSuccess");
+                        EndSynchronizeAndCleanup();
                         FireSyncSuccessEvent(new List<Record>());
-                        callback(new RunSyncOperationResponse(true, null));
                         return;
                     }
                     else
                     {
                         _logger.InfoFormat("OnSyncFailure");
+                        EndSynchronizeAndCleanup();
                         FireSyncFailureEvent(new SyncManagerException("Manual cancel"));
-                        callback(new RunSyncOperationResponse(false, null));
                         return;
                     }
                 }
@@ -520,7 +548,6 @@ namespace Amazon.CognitoSync.SyncManager
 
                     if (conflicts.Count > 0)
                     {
-
                         _logger.InfoFormat("{0} records in conflict!", conflicts.Count);
                         bool syncConflictResult = false;
                         if (this.OnSyncConflict == null)
@@ -535,7 +562,8 @@ namespace Amazon.CognitoSync.SyncManager
                         if (!syncConflictResult)
                         {
                             _logger.InfoFormat("User cancelled conflict resolution");
-                            callback(new RunSyncOperationResponse(false, null));
+                            EndSynchronizeAndCleanup();
+                            FireSyncFailureEvent(new OperationCanceledException("User cancelled conflict resolution"));
                             return;
                         }
                     }
@@ -553,7 +581,6 @@ namespace Amazon.CognitoSync.SyncManager
                     _local.UpdateLastSyncCount(GetIdentityId(), _datasetName,
                                               datasetUpdates.SyncCount);
                 }
-
 
                 // push changes to remote
                 List<Record> localChanges = this.GetModifiedRecords();
@@ -573,26 +600,26 @@ namespace Amazon.CognitoSync.SyncManager
                         Exception putRecordsException = putRecordsResult.Exception;
                         if (putRecordsException != null)
                         {
-                            if (putRecordsException.GetType() == typeof(DataConflictException))
+                            if (putRecordsException is DataConflictException)
                             {
                                 _logger.InfoFormat("Conflicts detected when pushing changes to remote: {0}", putRecordsException.Message);
                                 if (retry == 0) {
-                                    callback(new RunSyncOperationResponse(false, null));
+                                    EndSynchronizeAndCleanup();
                                     FireSyncFailureEvent(putRecordsResult.Exception);
                                 } else {
                                     //it's possible there is a local dirty record with a stale sync count this will fix it
                                     if (lastSyncCount > maxPatchSyncCount) {
-                                        _local.UpdateLastSyncCount(GetIdentityId(), _datasetName,  maxPatchSyncCount);
+                                        _local.UpdateLastSyncCount(GetIdentityId(), _datasetName, maxPatchSyncCount);
                                     }
-                                    this.RunSyncOperationAsync(--retry, callback);
+                                    this.RunSyncOperationAsync(--retry);
                                 }
                                 return;
                             }
-                            else if (putRecordsException.GetType() == typeof(SyncManagerException))
+                            else
                             {
                                 _logger.InfoFormat("OnSyncFailure {0}", putRecordsException.Message);
+                                EndSynchronizeAndCleanup();
                                 FireSyncFailureEvent(putRecordsException);
-                                callback(new RunSyncOperationResponse(false, null));
                                 return;
                             }
                         }
@@ -619,20 +646,20 @@ namespace Amazon.CognitoSync.SyncManager
                         }
 
                         _logger.InfoFormat("OnSyncSuccess");
-                        // call back
+                        EndSynchronizeAndCleanup();
                         FireSyncSuccessEvent(remoteRecords);
-                        callback(new RunSyncOperationResponse(true, null));
                         return;
                     });
+                }
+                else
+                {
+                    _logger.InfoFormat("OnSyncSuccess");
+                    EndSynchronizeAndCleanup();
+                    FireSyncSuccessEvent(remoteRecords);
                     return;
                 }
 
 
-                _logger.InfoFormat("OnSyncSuccess");
-                // call back
-                FireSyncSuccessEvent(remoteRecords);
-                callback(new RunSyncOperationResponse(true, null));
-                return;
             });
         }
 
@@ -646,28 +673,6 @@ namespace Amazon.CognitoSync.SyncManager
             if (result.NetworkReachability != NetworkReachability.NotReachable)
             {
                 Synchronize();
-            }
-        }
-
-        #endregion
-
-        #region model classes
-
-        class RunSyncOperationResponse
-        {
-            private bool _status;
-
-            public Exception Exception { get; set; }
-
-            public bool Status
-            {
-                get { return this._status; }
-            }
-
-            public RunSyncOperationResponse(bool status, Exception exception)
-            {
-                this._status = status;
-                this.Exception = exception;
             }
         }
 
@@ -706,9 +711,6 @@ namespace Amazon.CognitoSync.SyncManager
         {
             if (OnSyncFailure != null)
             {
-                if (exception is SyncManagerException)
-                    exception = new SyncManagerException(exception as SyncManagerException);
-
                 OnSyncFailure(this, new SyncFailureEvent(exception));
             }
         }
