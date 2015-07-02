@@ -14,25 +14,9 @@
 // for the specific language governing permissions and 
 // limitations under the License.
 //
-using Amazon.Runtime.Internal.Util;
-/**
- * Copyright 2013-2014 Amazon.com, 
- * Inc. or its affiliates. All Rights Reserved.
- * 
- * Licensed under the Amazon Software License (the "License"). 
- * You may not use this file except in compliance with the 
- * License. A copy of the License is located at
- * 
- *     http://aws.amazon.com/asl/
- * 
- * or in the "license" file accompanying this file. This file is 
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, express or implied. See the License 
- * for the specific language governing permissions and 
- * limitations under the License.
- */
 using System;
 using System.Collections.Generic;
+using Amazon.Runtime.Internal.Util;
 
 namespace Amazon.CognitoSync.SyncManager.Internal
 {
@@ -379,6 +363,9 @@ namespace Amazon.CognitoSync.SyncManager.Internal
                         storedRecord.Value = record.Value;
                         storedRecord.IsModified = record.IsModified;
                         storedRecord.SyncCount = record.SyncCount;
+                        storedRecord.LastModifiedTimestamp = record.LastModifiedDate;
+                        storedRecord.LastModifiedBy = record.LastModifiedBy;
+                        storedRecord.DeviceLastModifiedTimestamp = record.DeviceLastModifiedDate;
                     }
                     else
                     {
@@ -398,6 +385,11 @@ namespace Amazon.CognitoSync.SyncManager.Internal
                 }
                 UpdateLastModifiedTimestamp(identityId, datasetName);
             }
+        }
+
+        public void ConditionallyPutRecords(string identityId, string datasetName, List<Record> records, List<Record> localRecords)
+        {
+            PutRecords(identityId, datasetName, records);
         }
 
         public List<DatasetMetadata> GetDatasetMetadata(string identityId)

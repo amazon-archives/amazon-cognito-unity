@@ -14,7 +14,6 @@
 // for the specific language governing permissions and 
 // limitations under the License.
 //
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -438,7 +437,7 @@ namespace Amazon.CognitoSync.SyncManager.Internal
             {
                 foreach (Record record in records)
                 {
-                    this.UpdateAndClearRecord(identityId, datasetName, record);
+                    this.UpdateOrInsertRecord(identityId, datasetName, record);
                 }
             }
         }
@@ -928,7 +927,7 @@ namespace Amazon.CognitoSync.SyncManager.Internal
             }
         }
 
-        private void UpdateAndClearRecord(string identityId, string datasetName, Record record)
+        private void UpdateOrInsertRecord(string identityId, string datasetName, Record record)
         {
             lock (sqlite_lock)
             {
@@ -960,7 +959,10 @@ namespace Amazon.CognitoSync.SyncManager.Internal
                             new string[] {
                             RecordColumns.VALUE,
                             RecordColumns.SYNC_COUNT,
-                            RecordColumns.MODIFIED
+                            RecordColumns.MODIFIED,
+                            RecordColumns.LAST_MODIFIED_TIMESTAMP,
+                            RecordColumns.LAST_MODIFIED_BY,
+                            RecordColumns.DEVICE_LAST_MODIFIED_TIMESTAMP
                         },
                         RecordColumns.IDENTITY_ID + " = @whereIdentityId AND " +
                             RecordColumns.DATASET_NAME + " = @whereDatasetName AND " +
@@ -969,9 +971,12 @@ namespace Amazon.CognitoSync.SyncManager.Internal
                         stmt.BindText(1, record.Value);
                         stmt.BindInt(2, record.SyncCount);
                         stmt.BindInt(3, record.IsModified ? 1 : 0);
-                        stmt.BindText(4, identityId);
-                        stmt.BindText(5, datasetName);
-                        stmt.BindText(6, record.Key);
+                        stmt.BindDateTime(4, record.LastModifiedDate);
+                        stmt.BindText(5, record.LastModifiedBy);
+                        stmt.BindDateTime(6, record.DeviceLastModifiedDate);
+                        stmt.BindText(7, identityId);
+                        stmt.BindText(8, datasetName);
+                        stmt.BindText(9, record.Key);
                         stmt.Step();
                     }
                     else
@@ -1175,6 +1180,40 @@ namespace Amazon.CognitoSync.SyncManager.Internal
                 _logger.InfoFormat("{0}", @"Cognito Sync - SQLiteStorage - completed setupdatabase");
             }
         }
+
+        public void ConditionallyPutRecords(String identityId, String datasetName, List<Record> records,
+                List<Record> localRecords)
+        {
+            /*
+             * Grab an instance of the record from the local store with the remote change's 
+             * key and the snapshot version.
+             * 1) If both are null the remote change is new and we should save. 
+             * 2) If both exist but the values and sync counts have changed, 
+             *    it has changed locally and we shouldn't overwrite with the remote changes, 
+             *    which will still exist in remote. 
+             * 3) If both exist and the values have not changed, we should save the remote change.
+             * 4) If the current check exists but it wasn't in the snapshot, we should save.
+             */
+            Dictionary<string, Record> localRecordMap = new Dictionary<string, Record>();
+            foreach (Record record in localRecords)
+            {
+                localRecordMap[record.Key] = record;
+            }
+            foreach (Record record in records)
+            {
+                Record databaseRecord = this.GetRecord(identityId, datasetName, record.Key);
+                Record oldDatabaseRecord = localRecordMap[record.Key];
+                if (databaseRecord != null && oldDatabaseRecord != null
+                        && (!StringUtils.Equals(databaseRecord.Value, oldDatabaseRecord.Value)
+                        || databaseRecord.SyncCount != oldDatabaseRecord.SyncCount
+                        || !StringUtils.Equals(databaseRecord.LastModifiedBy, oldDatabaseRecord.LastModifiedBy)))
+                {
+                    continue;
+                }
+                UpdateOrInsertRecord(identityId, datasetName, record);
+            }
+
+        }
+
     }
 }
-

@@ -1,3 +1,11 @@
+Version 2.0.0.2
+Features:
+- Added support for Cognito Events, which allow to check and change the content of a Dataset after pushing it using Amazon Lambda.
+
+Bugs:
+- Fixed Dataset's Synchronize method to fail if the OnDatasetMerged callback returned false.
+- Avoid reparenting data from authenticated identities to new unauthenticated identities.
+
 Version 2.0.0.0
 For a complete list of New Features and Improvements please visit http://mobile.awsblog.com/post/Tx30Z7HPU42S0IN/Improvements-in-the-AWS-Mobile-SDK-for-Unity
 

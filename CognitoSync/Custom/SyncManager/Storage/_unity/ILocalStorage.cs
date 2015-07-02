@@ -14,7 +14,6 @@
 // for the specific language governing permissions and 
 // limitations under the License.
 //
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -104,6 +103,17 @@ namespace Amazon.CognitoSync.SyncManager
         /// <param name="datasetName">Dataset name.</param>
         /// <param name="records">A list of Records.</param>
         void PutRecords(string identityId, string datasetName, List<Record> records);
+
+        /// <summary>
+        /// Puts a list of raw records into thet dataset if 
+        /// the local version hasn't changed (to be used in 
+        /// synchronizations). 
+        /// </summary> 
+        /// <param name="identityId">Identity id.</param>
+        /// <param name="datasetName">Dataset name.</param>
+        /// <param name="localRecords">A list of records to check for changes.</param>
+        void ConditionallyPutRecords(String identityId, String datasetName,
+            List<Record> records, List<Record> localRecords);
 
         /// <summary>
         /// Gets a list of dataset's metadata information.

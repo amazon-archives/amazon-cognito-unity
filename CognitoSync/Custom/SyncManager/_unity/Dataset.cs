@@ -373,6 +373,7 @@ namespace Amazon.CognitoSync.SyncManager
 
                 if (!resume)
                 {
+                    EndSynchronizeAndCleanup();
                     FireSyncFailureEvent(new OperationCanceledException(string.Format("Sync canceled on merge for dataset - {0}", this._datasetName)));
                     return;
                 }
@@ -627,7 +628,7 @@ namespace Amazon.CognitoSync.SyncManager
                         List<Record> result = putRecordsResult.Response;
 
                         // update local meta data
-                        _local.PutRecords(GetIdentityId(), _datasetName, result);
+                        _local.ConditionallyPutRecords(GetIdentityId(), _datasetName, result, localChanges);
 
                         // verify the server sync count is increased exactly by one, aka no
                         // other updates were made during this update.

@@ -160,11 +160,14 @@ namespace Amazon.CognitoSync.SyncManager
 
         protected void IdentityChanged(object sender, EventArgs e)
         {
-            var identityChangedEvent = e as Amazon.CognitoIdentity.CognitoAWSCredentials.IdentityChangedArgs;
-            String oldIdentity = identityChangedEvent.OldIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.OldIdentityId;
-            String newIdentity = identityChangedEvent.NewIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.NewIdentityId;
-            _logger.InfoFormat("identity change detected: {0}, {1}", oldIdentity, newIdentity);
-            if (oldIdentity != newIdentity) Local.ChangeIdentityId(oldIdentity, newIdentity);
+            Amazon.CognitoIdentity.CognitoAWSCredentials.IdentityChangedArgs identityChangedEvent = e as Amazon.CognitoIdentity.CognitoAWSCredentials.IdentityChangedArgs;
+            if (identityChangedEvent.NewIdentityId != null)
+            {
+                String oldIdentity = identityChangedEvent.OldIdentityId == null ? DatasetUtils.UNKNOWN_IDENTITY_ID : identityChangedEvent.OldIdentityId;
+                String newIdentity = identityChangedEvent.NewIdentityId;
+                _logger.InfoFormat("Identity changed from {0} to {1}", oldIdentity, newIdentity);
+                Local.ChangeIdentityId(oldIdentity, newIdentity);
+            }
         }
 
         protected string GetIdentityId()
