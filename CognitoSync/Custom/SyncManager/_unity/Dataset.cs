@@ -167,7 +167,7 @@ namespace Amazon.CognitoSync.SyncManager
         /// <see cref="Amazon.CognitoSync.SyncManager.Record"/> doesn't exist or is marked deleted, null will be returned.
         /// </summary>
         /// <param name="key">key of the record in the dataset.</param>
-        public Record GetRecord(string key)
+        public virtual Record GetRecord(string key)
         {
             return _local.GetRecord(GetIdentityId(), _datasetName, DatasetUtils.ValidateRecordKey(key));
         }

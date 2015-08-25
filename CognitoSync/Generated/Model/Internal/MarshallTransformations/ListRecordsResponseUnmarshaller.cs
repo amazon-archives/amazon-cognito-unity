@@ -38,8 +38,13 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
     /// <summary>
     /// Response Unmarshaller for ListRecords operation
     /// </summary>  
-    public class ListRecordsResponseUnmarshaller : JsonResponseUnmarshaller, ISimplifiedErrorUnmarshaller 
+    public class ListRecordsResponseUnmarshaller : JsonResponseUnmarshaller
     {
+        /// <summary>
+        /// Unmarshaller the response from the service to the response class.
+        /// </summary>  
+        /// <param name="context"></param>
+        /// <returns></returns>
         public override AmazonWebServiceResponse Unmarshall(JsonUnmarshallerContext context)
         {
             ListRecordsResponse response = new ListRecordsResponse();
@@ -107,6 +112,13 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
             return response;
         }
 
+        /// <summary>
+        /// Unmarshaller error response to exception.
+        /// </summary>  
+        /// <param name="context"></param>
+        /// <param name="innerException"></param>
+        /// <param name="statusCode"></param>
+        /// <returns></returns>
         public override AmazonServiceException UnmarshallException(JsonUnmarshallerContext context, Exception innerException, HttpStatusCode statusCode)
         {
             ErrorResponse errorResponse = JsonErrorResponseUnmarshaller.GetInstance().Unmarshall(context);
@@ -129,37 +141,16 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
             return new AmazonCognitoSyncException(errorResponse.Message, innerException, errorResponse.Type, errorResponse.Code, errorResponse.RequestId, statusCode);
         }
 
-        public AmazonServiceException UnmarshallException(IWebResponseData response, ErrorResponse errorResponse, Exception innerException)
-        {
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("InternalError"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new InternalErrorException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("InvalidParameter"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new InvalidParameterException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("NotAuthorizedError"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new NotAuthorizedException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("TooManyRequests"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new TooManyRequestsException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            return new AmazonCognitoSyncException(GetDefaultErrorMessage<AmazonCognitoSyncException>(), innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-        }
-
         private static ListRecordsResponseUnmarshaller _instance = new ListRecordsResponseUnmarshaller();        
 
         internal static ListRecordsResponseUnmarshaller GetInstance()
         {
             return _instance;
         }
+
+        /// <summary>
+        /// Gets the singleton.
+        /// </summary>  
         public static ListRecordsResponseUnmarshaller Instance
         {
             get

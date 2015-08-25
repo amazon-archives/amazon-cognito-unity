@@ -67,6 +67,11 @@ namespace Amazon.CognitoSync
             return FindValue<BulkPublishStatus>(value);
         }
 
+        /// <summary>
+        /// Utility method to convert strings to the constant class.
+        /// </summary>
+        /// <param name="value">The string value to convert to the constant class.</param>
+        /// <returns></returns>
         public static implicit operator BulkPublishStatus(string value)
         {
             return FindValue(value);
@@ -107,6 +112,11 @@ namespace Amazon.CognitoSync
             return FindValue<Operation>(value);
         }
 
+        /// <summary>
+        /// Utility method to convert strings to the constant class.
+        /// </summary>
+        /// <param name="value">The string value to convert to the constant class.</param>
+        /// <returns></returns>
         public static implicit operator Operation(string value)
         {
             return FindValue(value);
@@ -155,6 +165,11 @@ namespace Amazon.CognitoSync
             return FindValue<Platform>(value);
         }
 
+        /// <summary>
+        /// Utility method to convert strings to the constant class.
+        /// </summary>
+        /// <param name="value">The string value to convert to the constant class.</param>
+        /// <returns></returns>
         public static implicit operator Platform(string value)
         {
             return FindValue(value);
@@ -195,6 +210,11 @@ namespace Amazon.CognitoSync
             return FindValue<StreamingStatus>(value);
         }
 
+        /// <summary>
+        /// Utility method to convert strings to the constant class.
+        /// </summary>
+        /// <param name="value">The string value to convert to the constant class.</param>
+        /// <returns></returns>
         public static implicit operator StreamingStatus(string value)
         {
             return FindValue(value);

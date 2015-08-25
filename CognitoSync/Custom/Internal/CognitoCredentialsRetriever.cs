@@ -15,7 +15,6 @@
 // for the specific language governing permissions and 
 // limitations under the License.
 //
-
 using System;
 using System.Threading;
 using System.Collections.Generic;
@@ -44,11 +43,19 @@ namespace Amazon.CognitoSync.Internal
     /// </summary>
     public class CognitoCredentialsRetriever : CredentialsRetriever
     {
+        /// <summary>
+        /// Construct an instance of CognitoCredentialsRetriever
+        /// </summary>
+        /// <param name="credentials"></param>        
         public CognitoCredentialsRetriever(AWSCredentials credentials)
             : base(credentials)
         { }
 
 #if BCL || AWSSDK_UNITY
+        /// <summary>
+        /// Custom pipeline handler
+        /// </summary>
+        /// <param name="executionContext"></param>        
         protected override void PreInvoke(IExecutionContext executionContext)
         {
             base.PreInvoke(executionContext);
@@ -77,7 +84,7 @@ namespace Amazon.CognitoSync.Internal
         }
 #endif
 
-        private void SetIdentity(IExecutionContext executionContext, string identityId, string identityPoolId)
+        private static void SetIdentity(IExecutionContext executionContext, string identityId, string identityPoolId)
         {
             var request = executionContext.RequestContext.OriginalRequest;
             var syncRequest = request as AmazonCognitoSyncRequest;

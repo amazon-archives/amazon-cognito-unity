@@ -38,8 +38,13 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
     /// <summary>
     /// Response Unmarshaller for SetCognitoEvents operation
     /// </summary>  
-    public class SetCognitoEventsResponseUnmarshaller : JsonResponseUnmarshaller, ISimplifiedErrorUnmarshaller 
+    public class SetCognitoEventsResponseUnmarshaller : JsonResponseUnmarshaller
     {
+        /// <summary>
+        /// Unmarshaller the response from the service to the response class.
+        /// </summary>  
+        /// <param name="context"></param>
+        /// <returns></returns>
         public override AmazonWebServiceResponse Unmarshall(JsonUnmarshallerContext context)
         {
             SetCognitoEventsResponse response = new SetCognitoEventsResponse();
@@ -48,6 +53,13 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
             return response;
         }
 
+        /// <summary>
+        /// Unmarshaller error response to exception.
+        /// </summary>  
+        /// <param name="context"></param>
+        /// <param name="innerException"></param>
+        /// <param name="statusCode"></param>
+        /// <returns></returns>
         public override AmazonServiceException UnmarshallException(JsonUnmarshallerContext context, Exception innerException, HttpStatusCode statusCode)
         {
             ErrorResponse errorResponse = JsonErrorResponseUnmarshaller.GetInstance().Unmarshall(context);
@@ -74,42 +86,16 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
             return new AmazonCognitoSyncException(errorResponse.Message, innerException, errorResponse.Type, errorResponse.Code, errorResponse.RequestId, statusCode);
         }
 
-        public AmazonServiceException UnmarshallException(IWebResponseData response, ErrorResponse errorResponse, Exception innerException)
-        {
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("InternalError"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new InternalErrorException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("InvalidParameter"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new InvalidParameterException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("NotAuthorizedError"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new NotAuthorizedException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("ResourceNotFound"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new ResourceNotFoundException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("TooManyRequests"))
-            {
-                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
-                return new TooManyRequestsException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-            }
-            return new AmazonCognitoSyncException(GetDefaultErrorMessage<AmazonCognitoSyncException>(), innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
-        }
-
         private static SetCognitoEventsResponseUnmarshaller _instance = new SetCognitoEventsResponseUnmarshaller();        
 
         internal static SetCognitoEventsResponseUnmarshaller GetInstance()
         {
             return _instance;
         }
+
+        /// <summary>
+        /// Gets the singleton.
+        /// </summary>  
         public static SetCognitoEventsResponseUnmarshaller Instance
         {
             get

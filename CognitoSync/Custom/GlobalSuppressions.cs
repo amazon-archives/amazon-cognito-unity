@@ -14,26 +14,7 @@
 // for the specific language governing permissions and 
 // limitations under the License.
 //
+using System.Diagnostics.CodeAnalysis;
 
-/*
- * Do not modify this file. This file is generated from the cognito-sync-2014-06-30.normal.json service model.
- */
-using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using System.Text;
-using System.IO;
-
-using Amazon.Runtime;
-using Amazon.Runtime.Internal;
-
-namespace Amazon.CognitoSync.Model
-{
-    /// <summary>
-    /// Response to a SubscribeToDataset request.
-    /// </summary>
-    public partial class SubscribeToDatasetResult : AmazonWebServiceResponse
-    {
-
-    }
-}
+// Initialize reference type static fields inline
+[module: SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Scope = "member", Target = "Amazon.CognitoSync.Internal.CognitoCredentialsRetriever+CSRequestCache.#.cctor()")]
