@@ -93,6 +93,16 @@ namespace Amazon.CognitoSync.SyncManager.Internal
                 ? UNKNOWN_IDENTITY_ID
                     : credentials.GetCachedIdentityId();
         }
+
+        /// <summary>
+        /// A helper function to truncate a DateTime object to whole seconds.
+        /// </summary>
+        /// <returns>The truncated DateTime</returns>
+        /// <param name="dateTime">The DateTime to be truncated.</param>
+        public static DateTime TruncateToSeconds(DateTime dateTime)
+        {
+            return dateTime.AddTicks(-(dateTime.Ticks % TimeSpan.TicksPerSecond));
+        }
     }
 }
 

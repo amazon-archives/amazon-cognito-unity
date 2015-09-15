@@ -306,6 +306,7 @@ namespace Amazon.CognitoSync.SyncManager.Internal
         private RecordPatch RecordToPatch(Record record)
         {
             RecordPatch patch = new RecordPatch();
+            patch.DeviceLastModifiedDate = record.DeviceLastModifiedDate.Value;
             patch.Key = record.Key;
             patch.Value = record.Value;
             patch.SyncCount = record.SyncCount;
