@@ -196,7 +196,6 @@ namespace Amazon.CognitoSync
         
         #region  BulkPublish
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the BulkPublish operation.
         /// </summary>
@@ -224,7 +223,6 @@ namespace Amazon.CognitoSync
         
         #region  DeleteDataset
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the DeleteDataset operation.
         /// </summary>
@@ -251,7 +249,6 @@ namespace Amazon.CognitoSync
         #endregion
         
         #region  DescribeDataset
-
 
         /// <summary>
         /// Initiates the asynchronous execution of the DescribeDataset operation.
@@ -285,11 +282,15 @@ namespace Amazon.CognitoSync
         /// 
         ///  
         /// <para>
-        /// DescribeIdentityPoolUsage can only be called with developer credentials. You cannot
-        /// make this API call with the temporary user credentials provided by Cognito Identity.
+        /// This API can only be called with developer credentials. You cannot call this API with
+        /// the temporary user credentials provided by Cognito Identity.
         /// </para>
         /// </summary>
         /// <param name="identityPoolId">A name-spaced GUID (for example, us-east-1:23EC4050-6AEA-7089-A2DD-08002EXAMPLE) created by Amazon Cognito. GUID generation is unique within a region.</param>
+        /// <param name="options">
+         ///     A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+         ///     procedure using the AsyncState property.
+         /// </param>
         /// 
         /// <returns>The response from the DescribeIdentityPoolUsage service method, as returned by CognitoSync.</returns>
         /// <exception cref="Amazon.CognitoSync.Model.InternalErrorException">
@@ -307,7 +308,7 @@ namespace Amazon.CognitoSync
         /// <exception cref="Amazon.CognitoSync.Model.TooManyRequestsException">
         /// Thrown if the request is throttled.
         /// </exception>
-        public void DescribeIdentityPoolUsageAsync(string identityPoolId, AmazonServiceCallback<DescribeIdentityPoolUsageRequest, DescribeIdentityPoolUsageResponse> callback, AsyncOptions options = null)
+        public void DescribeIdentityPoolUsageAsync(string identityPoolId,  AmazonServiceCallback<DescribeIdentityPoolUsageRequest, DescribeIdentityPoolUsageResponse> callback, AsyncOptions options = null)
         {
             var request = new DescribeIdentityPoolUsageRequest();
             request.IdentityPoolId = identityPoolId;
@@ -342,7 +343,6 @@ namespace Amazon.CognitoSync
         
         #region  DescribeIdentityUsage
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the DescribeIdentityUsage operation.
         /// </summary>
@@ -370,7 +370,6 @@ namespace Amazon.CognitoSync
         
         #region  GetBulkPublishDetails
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the GetBulkPublishDetails operation.
         /// </summary>
@@ -397,7 +396,6 @@ namespace Amazon.CognitoSync
         #endregion
         
         #region  GetCognitoEvents
-
 
         /// <summary>
         /// Initiates the asynchronous execution of the GetCognitoEvents operation.
@@ -428,8 +426,18 @@ namespace Amazon.CognitoSync
 
         /// <summary>
         /// Gets the configuration settings of an identity pool.
+        /// 
+        ///  
+        /// <para>
+        /// This API can only be called with developer credentials. You cannot call this API with
+        /// the temporary user credentials provided by Cognito Identity.
+        /// </para>
         /// </summary>
         /// <param name="identityPoolId">A name-spaced GUID (for example, us-east-1:23EC4050-6AEA-7089-A2DD-08002EXAMPLE) created by Amazon Cognito. This is the ID of the pool for which to return a configuration.</param>
+        /// <param name="options">
+         ///     A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback
+         ///     procedure using the AsyncState property.
+         /// </param>
         /// 
         /// <returns>The response from the GetIdentityPoolConfiguration service method, as returned by CognitoSync.</returns>
         /// <exception cref="Amazon.CognitoSync.Model.InternalErrorException">
@@ -447,7 +455,7 @@ namespace Amazon.CognitoSync
         /// <exception cref="Amazon.CognitoSync.Model.TooManyRequestsException">
         /// Thrown if the request is throttled.
         /// </exception>
-        public void GetIdentityPoolConfigurationAsync(string identityPoolId, AmazonServiceCallback<GetIdentityPoolConfigurationRequest, GetIdentityPoolConfigurationResponse> callback, AsyncOptions options = null)
+        public void GetIdentityPoolConfigurationAsync(string identityPoolId,  AmazonServiceCallback<GetIdentityPoolConfigurationRequest, GetIdentityPoolConfigurationResponse> callback, AsyncOptions options = null)
         {
             var request = new GetIdentityPoolConfigurationRequest();
             request.IdentityPoolId = identityPoolId;
@@ -482,7 +490,6 @@ namespace Amazon.CognitoSync
         
         #region  ListDatasets
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the ListDatasets operation.
         /// </summary>
@@ -509,7 +516,6 @@ namespace Amazon.CognitoSync
         #endregion
         
         #region  ListIdentityPoolUsage
-
 
         /// <summary>
         /// Initiates the asynchronous execution of the ListIdentityPoolUsage operation.
@@ -538,7 +544,6 @@ namespace Amazon.CognitoSync
         
         #region  ListRecords
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the ListRecords operation.
         /// </summary>
@@ -565,7 +570,6 @@ namespace Amazon.CognitoSync
         #endregion
         
         #region  RegisterDevice
-
 
         /// <summary>
         /// Initiates the asynchronous execution of the RegisterDevice operation.
@@ -594,7 +598,6 @@ namespace Amazon.CognitoSync
         
         #region  SetCognitoEvents
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the SetCognitoEvents operation.
         /// </summary>
@@ -621,7 +624,6 @@ namespace Amazon.CognitoSync
         #endregion
         
         #region  SetIdentityPoolConfiguration
-
 
         /// <summary>
         /// Initiates the asynchronous execution of the SetIdentityPoolConfiguration operation.
@@ -650,7 +652,6 @@ namespace Amazon.CognitoSync
         
         #region  SubscribeToDataset
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the SubscribeToDataset operation.
         /// </summary>
@@ -678,7 +679,6 @@ namespace Amazon.CognitoSync
         
         #region  UnsubscribeFromDataset
 
-
         /// <summary>
         /// Initiates the asynchronous execution of the UnsubscribeFromDataset operation.
         /// </summary>
@@ -705,7 +705,6 @@ namespace Amazon.CognitoSync
         #endregion
         
         #region  UpdateRecords
-
 
         /// <summary>
         /// Initiates the asynchronous execution of the UpdateRecords operation.

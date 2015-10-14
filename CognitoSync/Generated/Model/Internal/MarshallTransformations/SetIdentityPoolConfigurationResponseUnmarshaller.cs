@@ -38,7 +38,7 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
     /// <summary>
     /// Response Unmarshaller for SetIdentityPoolConfiguration operation
     /// </summary>  
-    public class SetIdentityPoolConfigurationResponseUnmarshaller : JsonResponseUnmarshaller
+    public class SetIdentityPoolConfigurationResponseUnmarshaller : JsonResponseUnmarshaller, ISimplifiedErrorUnmarshaller 
     {
         /// <summary>
         /// Unmarshaller the response from the service to the response class.
@@ -86,6 +86,10 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
         public override AmazonServiceException UnmarshallException(JsonUnmarshallerContext context, Exception innerException, HttpStatusCode statusCode)
         {
             ErrorResponse errorResponse = JsonErrorResponseUnmarshaller.GetInstance().Unmarshall(context);
+            if (errorResponse.Code != null && errorResponse.Code.Equals("ConcurrentModification"))
+            {
+                return new ConcurrentModificationException(errorResponse.Message, innerException, errorResponse.Type, errorResponse.Code, errorResponse.RequestId, statusCode);
+            }
             if (errorResponse.Code != null && errorResponse.Code.Equals("InternalError"))
             {
                 return new InternalErrorException(errorResponse.Message, innerException, errorResponse.Type, errorResponse.Code, errorResponse.RequestId, statusCode);
@@ -109,6 +113,40 @@ namespace Amazon.CognitoSync.Model.Internal.MarshallTransformations
             return new AmazonCognitoSyncException(errorResponse.Message, innerException, errorResponse.Type, errorResponse.Code, errorResponse.RequestId, statusCode);
         }
 
+        public AmazonServiceException UnmarshallException(IWebResponseData response, ErrorResponse errorResponse, Exception innerException)
+        {
+            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("ConcurrentModification", StringComparison.OrdinalIgnoreCase))
+            {
+                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
+                return new ConcurrentModificationException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+            }
+            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("InternalError", StringComparison.OrdinalIgnoreCase))
+            {
+                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
+                return new InternalErrorException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+            }
+            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("InvalidParameter", StringComparison.OrdinalIgnoreCase))
+            {
+                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
+                return new InvalidParameterException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+            }
+            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("NotAuthorizedError", StringComparison.OrdinalIgnoreCase))
+            {
+                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
+                return new NotAuthorizedException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+            }
+            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("ResourceNotFound", StringComparison.OrdinalIgnoreCase))
+            {
+                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
+                return new ResourceNotFoundException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+            }
+            if (!string.IsNullOrEmpty(errorResponse.Code) && errorResponse.Code.StartsWith("TooManyRequests", StringComparison.OrdinalIgnoreCase))
+            {
+                string message = string.IsNullOrEmpty(errorResponse.Message)?GetDefaultErrorMessage<AmazonCognitoSyncException>():errorResponse.Message;
+                return new TooManyRequestsException(message, innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+            }
+            return new AmazonCognitoSyncException(GetDefaultErrorMessage<AmazonCognitoSyncException>(), innerException, ErrorType.Unknown, errorResponse.Code, errorResponse.RequestId, response.StatusCode);
+        }
         private static SetIdentityPoolConfigurationResponseUnmarshaller _instance = new SetIdentityPoolConfigurationResponseUnmarshaller();        
 
         internal static SetIdentityPoolConfigurationResponseUnmarshaller GetInstance()
