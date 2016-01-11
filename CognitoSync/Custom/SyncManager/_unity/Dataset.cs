@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using UnityEngine;
+using Logger = Amazon.Runtime.Internal.Util.Logger;
 
 namespace Amazon.CognitoSync.SyncManager
 {

@@ -29,6 +29,7 @@ using UnityEngine;
 using Amazon.Util.Storage;
 using Amazon.Runtime.Internal.Util;
 using Amazon.Util.Storage.Internal;
+using Logger = Amazon.Runtime.Internal.Util.Logger;
 
 namespace Amazon.CognitoSync.SyncManager.Internal
 {

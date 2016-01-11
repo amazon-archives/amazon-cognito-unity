@@ -23,6 +23,7 @@ using Amazon.CognitoIdentity;
 using Amazon.Runtime.Internal.Util;
 using UnityEngine;
 using Amazon.Util.Internal;
+using Logger = Amazon.Runtime.Internal.Util.Logger;
 
 namespace Amazon.CognitoSync.SyncManager
 {
